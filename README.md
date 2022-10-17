@@ -7,6 +7,7 @@ Welcome to Bryan Miller's Todo List Project, the [eleventh assignment](https://w
 - `npm` & `webpack`
 - ES6 Modules
 - SASS
+- VIM: Neovim (First Project)
 
 ## Summary
 
