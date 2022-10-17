@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,800;1,400&display=swap')
+
+:root {
+  --ff-main: 'Montserrat', sans-serif;
+
+  --clr-neutral-900: #000000;
+  --clr-neutral-800: #000000;
+  --clr-neutral-200: #000000;
+  --clr-neutral-100: #ffffff;
+
+  --border-radius: 8px;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+  font-family: var(--ff-main);
+}
