@@ -1,0 +1,25 @@
+{
+  "name": "odin-todo-list",
+  "version": "1.0.0",
+  "description": "Odin Project Assignment #11: Todo List",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bmilcs/odin-todo-list.git"
+  },
+  "keywords": [
+    "solid",
+    "modules",
+    "javascript",
+    "odin-project"
+  ],
+  "author": "Bryan Miller <bmilcs@yahoo.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bmilcs/odin-todo-list/issues"
+  },
+  "homepage": "https://github.com/bmilcs/odin-todo-list#readme"
+}
