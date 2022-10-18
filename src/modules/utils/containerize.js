@@ -8,8 +8,6 @@ export const containerize = (divClassName, ...childElements) => {
   const container = makeElement("div", divClassName);
   const children = Array.from(childElements);
 
-  console.log(children);
-
   children.forEach(child => container.appendChild(child));
 
   return container;
