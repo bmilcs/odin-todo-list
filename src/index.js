@@ -1,6 +1,14 @@
 import "./scss/index.scss"
-import { makeElement } from "./modules/utils/make-element";
 import { header } from "./modules/header.js";
 
-document.querySelector("body").appendChild(header);
+const assembleBody = () => {
+  const body = document.querySelector("body");
+  const elements = [
+    header,
+  ];
+
+  elements.forEach(element => body.appendChild(element));
+}
+
+assembleBody();
 
