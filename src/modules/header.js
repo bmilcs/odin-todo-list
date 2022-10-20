@@ -1,5 +1,5 @@
-import { makeElement } from "./utils/make-element";
-import { containerize } from "./utils/containerize";
+import makeElement from "./utils/make-element";
+import containerize from "./utils/containerize";
 import headerIcon from "../assets/header-icon-2.svg";
 
 const createHeader = () => {
@@ -10,5 +10,4 @@ const createHeader = () => {
 }
 
 const header = createHeader();
-
 export { header };

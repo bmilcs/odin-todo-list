@@ -1,4 +1,4 @@
-function makeElement(type, classes, textContentOrAlt, id, srcOrHref) {
+export default function makeElement(type, classes, textContentOrAlt, id, srcOrHref) {
   // minimum requirements: element type
   if (!type) return;
 
@@ -20,5 +20,3 @@ function makeElement(type, classes, textContentOrAlt, id, srcOrHref) {
 
   return element;
 }
-
-export { makeElement };
