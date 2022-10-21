@@ -3,14 +3,14 @@
 // object role: information holder
 //
 
-export default function Task(task, dueDate = 'No Date') {
-  this.task = task;
+export default function Task(description, dueDate = 'No Date') {
+  this.description = description;
   this.dueDate = dueDate;
   this.status = 0;
 }
 
-Task.prototype.getTask = function() {
-  return this.task;
+Task.prototype.getDescription = function() {
+  return this.description;
 }
 
 Task.prototype.getDate = function() {
@@ -22,8 +22,8 @@ Task.prototype.getStatus = function() {
   else return "Completed";
 }
 
-Task.prototype.setTask = function(task) {
-  this.task = task;
+Task.prototype.setDescription = function(description) {
+  this.description = description;
 }
 
 Task.prototype.setDate = function(date) {
