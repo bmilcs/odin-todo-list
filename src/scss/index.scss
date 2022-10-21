@@ -23,16 +23,23 @@
 }
 
 body {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: min-content 1fr min-content;
+  grid-template-areas: 
+    "header header"
+    "sidebar content"
+    "footer footer";
+
   min-height: 100vh;
 }
 
 .header-container {
+  grid-area: header;
+
   display: flex;
-  gap: 0.5rem;
   align-items: center;
   justify-content: flex-end;
+  gap: 0.5rem;
 
   background: var(--clr-neutral-200);
   color: var(--clr-neutral-800);
@@ -49,13 +56,14 @@ body {
 }
 
 .footer-container {
-  margin-top: auto;
-  background: var(--clr-neutral-200);
-
-  padding: 1rem;
+  grid-area: footer;
 
   display: grid;
   place-items: center;
+
+  padding: 1rem;
+
+  background: var(--clr-neutral-200);
 
   a {
     position: relative;
