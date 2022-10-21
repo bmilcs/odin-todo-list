@@ -18,4 +18,4 @@ const createFooter = () => {
 }
 
 const footer = createFooter();
-export { footer };
+export default footer;

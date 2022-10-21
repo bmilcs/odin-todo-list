@@ -10,4 +10,4 @@ const createHeader = () => {
 }
 
 const header = createHeader();
-export { header };
+export default header;
