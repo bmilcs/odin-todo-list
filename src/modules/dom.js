@@ -4,7 +4,7 @@ import containerize from "./utils/containerize";
 import header from "./header.js";
 import footer from "./footer.js";
 import main from "./main.js";
-import sampleList from "./sample-data";
+import * as Storage from "./todos";
 import plusSignSVG from "../assets/add.svg";
 import checkedImg from "../assets/checked.svg";
 import uncheckedImg from "../assets/unchecked.svg";
@@ -33,44 +33,50 @@ const renderSidebar = () => {
 };
 
 const renderMainContent = () => {
-  const defaultList = prepListElement(sampleList);
-  main.content.appendChild(defaultList);
+  Storage.addSampleData();
+  const sampleData = Storage.findList("Default List");
+  const sampleTodo = prepTodoListElements(sampleData);
+  main.content.appendChild(sampleTodo);
 };
 
-const prepListElement = (listObj) => {
+const prepTodoListElements = (listObj) => {
   const container = makeElement("div", "list-container");
   const title = makeElement("h2", "list-title", listObj.getName());
-  const addTaskContainer = prepAddNewTaskElements();
+  const addTask = prepAddNewTaskSection();
   const tasks = prepAllTaskElements(listObj.getTasks());
   container.appendChild(title);
-  container.appendChild(addTaskContainer);
+  container.appendChild(addTask);
   tasks.forEach((element) => container.appendChild(element));
   return container;
 };
 
-const prepAddNewTaskElements = () => {
+const prepAddNewTaskSection = () => {
   const container = makeElement("div", "add-task-section");
-  const newTaskLabel = makeElement("label", "add-task-label", "Add task");
-  const newTaskTextbox = makeElement(
+  const label = makeElement("label", "add-task-label", "Add task");
+  const textbox = makeElement(
     "input",
     "add-task-textbox",
     "",
     "add-task-textbox"
   );
-  const addTaskBtn = makeElement("button", "add-task-btn");
-  const addTaskImg = makeElement(
-    "img",
-    "add-task-img",
-    "Add Task",
-    "",
-    plusSignSVG
-  );
-  addTaskBtn.appendChild(addTaskImg);
+  const button = makeElement("button", "add-task-btn");
+  const image = makeElement("img", "add-task-img", "Add Task", "", plusSignSVG);
+  button.appendChild(image);
+  button.addEventListener("click", addTaskEvent);
   return containerize(
     container,
-    newTaskLabel,
-    containerize("add-task-textbox-container", newTaskTextbox, addTaskBtn)
+    label,
+    containerize("add-task-textbox-container", textbox, button)
   );
+};
+
+const addTaskEvent = (e) => {
+  // find current list's corresponding object
+  const listTitle = e.target.closest(".list-container").firstChild.textContent;
+
+  alert(findList(listTitle));
+  // add textbox value to object
+  // append to the page
 };
 
 const prepAllTaskElements = (taskArray) => {
@@ -99,4 +105,9 @@ const prepTaskElement = (task) => {
 const toggleTaskStatus = (e) => {
   const element = e.target;
   alert(`toggle status clicked on: ${element.classList}`);
+  // determine what task was clicked on
+  // determine the list object it belongs to
+  // find the index of the task within the task list's array
+  // toggle completion status
+  // update dom w/ status (change image)
 };
