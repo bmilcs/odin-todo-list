@@ -1,16 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,800;1,400&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,800;1,400&display=swap");
 
 :root {
-  --ff-main: 'Montserrat', sans-serif;
+  --ff-main: "Montserrat", sans-serif;
 
   --clr-neutral-900: #000000;
   --clr-neutral-800: #333333;
+  --clr-neutral-300: #cacaca;
   --clr-neutral-200: #f0f0f0;
   --clr-neutral-100: #ffffff;
 
-  --border-radius: 8px;
+  --border-radius: 4px;
 
-  --transition: all .3s ease-in-out;
+  --transition: all 0.3s ease-in-out;
 }
 
 *,
@@ -22,10 +23,19 @@
   font-family: var(--ff-main);
 }
 
+input {
+  font: inherit;
+  padding: 0.25rem 0.5rem;
+  border: none;
+  border: 2px solid var(--clr-neutral-300);
+  border-radius: var(--border-radius);
+  outline: none;
+}
+
 body {
   display: grid;
   grid-template-rows: min-content 1fr min-content;
-  grid-template-areas: 
+  grid-template-areas:
     "header header"
     "sidebar content"
     "footer footer";
@@ -62,7 +72,6 @@ body {
   padding: 1rem;
 
   .sidebar {
-
     // all children
     > * {
       padding-block: 1rem;
@@ -75,6 +84,52 @@ body {
       background: var(--clr-neutral-200);
       padding: 0.5em 1em;
     }
+  }
+}
+
+.list-container {
+  padding: 1rem;
+
+  outline: 1px solid var(--clr-neutral-200);
+
+  .list-title {
+    margin-bottom: 0.5rem;
+  }
+
+  .add-task-container {
+    display: flex;
+    gap: 0.5rem;
+
+    > * {
+      flex: 1;
+    }
+
+    .add-task-textbox {
+    }
+
+    .add-task-btn {
+      background: none;
+      border: 0;
+      border-radius: 50%;
+      max-width: 2rem;
+      aspect-ratio: 1/1;
+    }
+  }
+}
+
+.task-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+
+  padding: 0.75rem;
+  margin-block: 0.5rem;
+  background: var(--clr-neutral-200);
+  border-radius: var(--border-radius);
+
+  & :nth-child(3) {
+    margin-left: auto;
   }
 }
 
@@ -150,32 +205,4 @@ body {
       width: var(--size);
     }
   }
-
 }
-
-.list-container {
-  padding: 1rem;
-
-  outline: 1px solid var(--clr-neutral-200);
-
-  .list-title {
-    margin-bottom: .5rem;
-  }
-}
-
-.task-container {
-  display: flex;
-  align-items: center;
-  justify-content:  flex-start; 
-  gap: 1rem;
-
-  padding: 0.75rem;
-  margin-block: 0.5rem;
-  background: var(--clr-neutral-200);
-  border-radius: var(--border-radius);
-
-  & :nth-child(3) {
-    margin-left: auto;
-  }
-}
-

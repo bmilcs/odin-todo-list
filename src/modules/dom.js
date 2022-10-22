@@ -4,8 +4,9 @@ import header from "./header.js";
 import footer from "./footer.js";
 import main from "./main.js";
 import sampleList from "./sample-data";
-import checkedImg from "../assets/checkbox-filled.svg";
-import uncheckedImg from "../assets/checkbox-empty.svg";
+import plusSignSVG from "../assets/add.svg";
+import checkedImg from "../assets/checked.svg";
+import uncheckedImg from "../assets/unchecked.svg";
 
 export const renderPage = () => {
   renderLayout();
@@ -30,13 +31,40 @@ const renderSidebar = () => {
   main.sidebar.appendChild(p);
 };
 
+const renderMainContent = () => {
+  const defaultList = prepListElement(sampleList);
+  main.content.appendChild(defaultList);
+};
+
 const prepListElement = (listObj) => {
   const container = makeElement("div", "list-container");
   const title = makeElement("h2", "list-title", listObj.getName());
+  const addTaskContainer = prepAddTaskElements();
   const tasks = prepAllTaskElements(listObj.getTasks());
   container.appendChild(title);
+  container.appendChild(addTaskContainer);
   tasks.forEach((element) => container.appendChild(element));
   return container;
+};
+
+const prepAddTaskElements = () => {
+  const container = makeElement("div", "add-task-container");
+  const newTaskTextbox = makeElement(
+    "input",
+    "new-task-textbox",
+    "",
+    "new-task-textbox"
+  );
+  const addTaskBtn = makeElement("button", "add-task-btn");
+  const addTaskImg = makeElement(
+    "img",
+    "add-task-img",
+    "Add Task",
+    "",
+    plusSignSVG
+  );
+  addTaskBtn.appendChild(addTaskImg);
+  return containerize(container, newTaskTextbox, addTaskBtn);
 };
 
 const prepAllTaskElements = (taskArray) => {
@@ -58,18 +86,11 @@ const prepTaskElement = (task) => {
     task.getDescription()
   );
   const dueDate = makeElement("p", "task-date", task.getDate());
-
   checkbox.addEventListener("click", toggleTaskStatus);
-
   return containerize(container, checkbox, description, dueDate);
 };
 
 const toggleTaskStatus = (e) => {
   const element = e.target;
   alert(`toggle status clicked on: ${element.classList}`);
-};
-
-const renderMainContent = () => {
-  const defaultList = prepListElement(sampleList);
-  main.content.appendChild(defaultList);
 };
