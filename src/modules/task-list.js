@@ -27,10 +27,8 @@ TaskList.prototype.addTask = function (task, dueDate) {
 };
 
 TaskList.prototype.deleteTask = function (description) {
-  console.log(description);
   const index = this.getIndexForTask(description);
   this.tasks.splice(index, 1);
-  console.log(this.tasks);
 };
 
 TaskList.prototype.getIndexForTask = function (description) {

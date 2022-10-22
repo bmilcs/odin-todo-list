@@ -64,6 +64,9 @@ const prepAddNewTaskSection = () => {
   const image = makeElement("img", "add-task-img", "Add Task", "", plusSignSVG);
   button.appendChild(image);
   button.addEventListener("click", addTaskEvent);
+  textbox.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") addTaskEvent(e);
+  });
   return containerize(
     container,
     label,
@@ -99,11 +102,14 @@ const prepTaskElement = (task) => {
 const addTaskEvent = (e) => {
   const element = e.target;
 
+  // make sure text was entered
+  const description = getNewTaskText(element);
+  if (description === "") return;
+
   // add new task to its corresponding object
   const listTitle = getListTitle(element);
   const targetList = Storage.findList(listTitle);
-  const newTaskDescription = getNewTaskText(element);
-  targetList.addTask(newTaskDescription);
+  targetList.addTask(description);
 
   // create task elements & append it to the page
   const taskElement = prepTaskElement(targetList.getLastTask());
@@ -126,7 +132,7 @@ const toggleTaskStatus = (e) => {
 
 const deleteTask = (e) => {
   const element = e.target;
-  const task = deleteTaskFromStorage(element);
+  deleteTaskFromStorage(element);
   const taskContainer = element.closest(".task-container");
   taskContainer.remove();
 };
