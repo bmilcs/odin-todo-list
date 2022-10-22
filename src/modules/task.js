@@ -18,8 +18,7 @@ Task.prototype.getDate = function () {
 };
 
 Task.prototype.getStatus = function () {
-  if (this.status === 0) return "Incomplete";
-  else return "Completed";
+  return this.status ? "Complete" : "Incomplete";
 };
 
 Task.prototype.setDescription = function (description) {

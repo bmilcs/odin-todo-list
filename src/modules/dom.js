@@ -1,10 +1,10 @@
 import "../scss/index.scss";
 import makeElement from "./utils/make-element";
 import containerize from "./utils/containerize";
-import header from "./header.js";
-import footer from "./footer.js";
-import main from "./main.js";
-import * as Storage from "./todos";
+import header from "./header";
+import footer from "./footer";
+import main from "./main";
+import * as Storage from "./storage";
 import plusSignSVG from "../assets/add.svg";
 import checkedImg from "../assets/checked.svg";
 import uncheckedImg from "../assets/unchecked.svg";
@@ -70,25 +70,6 @@ const prepAddNewTaskSection = () => {
   );
 };
 
-const addTaskEvent = (e) => {
-  // find parent task list & it's title
-  const parentList = e.target.closest(".list-container");
-  const listTitle = parentList.firstChild.textContent;
-
-  // retrieve value for the new task
-  const newTaskDescription = parentList.querySelector("input").value;
-
-  // find the list's corresponding object by its title
-  const targetList = Storage.findList(listTitle);
-
-  // add textbox value to object
-  targetList.addTask(newTaskDescription);
-
-  // append new task to the page
-  const taskElement = prepTaskElement(targetList.getLastTask());
-  parentList.appendChild(taskElement);
-};
-
 const prepAllTaskElements = (taskArray) => {
   return taskArray.map((task) => prepTaskElement(task));
 };
@@ -112,12 +93,58 @@ const prepTaskElement = (task) => {
   return containerize(container, checkbox, description, dueDate);
 };
 
+const addTaskEvent = (e) => {
+  const element = e.target;
+
+  // add new task to its corresponding object
+  const listTitle = getListTitle(element);
+  const targetList = Storage.findList(listTitle);
+  const newTaskDescription = getNewTaskText(element);
+  targetList.addTask(newTaskDescription);
+
+  // create task elements & append it to the page
+  const taskElement = prepTaskElement(targetList.getLastTask());
+  const parentList = getParentList(element);
+  parentList.appendChild(taskElement);
+};
+
 const toggleTaskStatus = (e) => {
   const element = e.target;
-  alert(`toggle status clicked on: ${element.classList}`);
+
   // determine what task was clicked on
+  const taskDescription = element.nextElementSibling.textContent;
+
   // determine the list object it belongs to
-  // find the index of the task within the task list's array
-  // toggle completion status
-  // update dom w/ status (change image)
+  const listTitle = getListTitle(element);
+
+  // update status in it's object
+  const task = Storage.findTaskInList(taskDescription, listTitle);
+  task.toggleStatus();
+
+  // update dom w/ status
+  task.getStatus() === "Complete"
+    ? markAsCompleted(element)
+    : markAsIncomplete(element);
+};
+
+const markAsCompleted = (element) => {
+  element.src = checkedImg;
+};
+
+const markAsIncomplete = (element) => {
+  element.src = uncheckedImg;
+};
+
+const getParentList = (element) => {
+  return element.closest(".list-container");
+};
+
+const getListTitle = (element) => {
+  const parentList = getParentList(element);
+  return parentList.firstChild.textContent;
+};
+
+const getNewTaskText = (element) => {
+  const parentList = getParentList(element);
+  return parentList.querySelector("input").value;
 };
