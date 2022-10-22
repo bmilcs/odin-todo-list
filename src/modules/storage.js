@@ -16,10 +16,15 @@ const findList = (listTitle) => {
   });
 };
 
-const findTaskInList = (taskDesc, listTitle) => {
+const getTaskFromList = (taskDesc, listTitle) => {
   const taskList = findList(listTitle).tasks;
-  const index = taskList.findIndex((task) => task.description == taskDesc);
+  const index = taskList.findIndex((task) => task.description === taskDesc);
   return taskList[index];
+};
+
+const deleteTaskFromList = (description, listTitle) => {
+  const taskList = findList(listTitle);
+  taskList.deleteTask(description);
 };
 
 const addSampleData = () => {
@@ -29,4 +34,11 @@ const addSampleData = () => {
   addList(list);
 };
 
-export { addList, getLists, findList, findTaskInList, addSampleData };
+export {
+  addList,
+  getLists,
+  findList,
+  getTaskFromList,
+  deleteTaskFromList,
+  addSampleData,
+};

@@ -6,6 +6,7 @@ import footer from "./footer";
 import main from "./main";
 import * as Storage from "./storage";
 import plusSignSVG from "../assets/add.svg";
+import deleteSVG from "../assets/delete.svg";
 import checkedImg from "../assets/checked.svg";
 import uncheckedImg from "../assets/unchecked.svg";
 
@@ -89,8 +90,10 @@ const prepTaskElement = (task) => {
     task.getDescription()
   );
   const dueDate = makeElement("p", "task-date", task.getDate());
+  const deleteIcon = makeElement("img", "delete-task", "", "", deleteSVG);
+  deleteIcon.addEventListener("click", deleteTask);
   checkbox.addEventListener("click", toggleTaskStatus);
-  return containerize(container, checkbox, description, dueDate);
+  return containerize(container, checkbox, description, dueDate, deleteIcon);
 };
 
 const addTaskEvent = (e) => {
@@ -104,47 +107,69 @@ const addTaskEvent = (e) => {
 
   // create task elements & append it to the page
   const taskElement = prepTaskElement(targetList.getLastTask());
-  const parentList = getParentList(element);
+  const parentList = getParentListElement(element);
   parentList.appendChild(taskElement);
 };
 
 const toggleTaskStatus = (e) => {
   const element = e.target;
 
-  // determine what task was clicked on
-  const taskDescription = element.nextElementSibling.textContent;
-
-  // determine the list object it belongs to
-  const listTitle = getListTitle(element);
-
   // update status in it's object
-  const task = Storage.findTaskInList(taskDescription, listTitle);
+  const task = getTaskFromStorage(element);
   task.toggleStatus();
 
   // update dom w/ status
   task.getStatus() === "Complete"
-    ? markAsCompleted(element)
-    : markAsIncomplete(element);
+    ? markTaskComplete(element)
+    : markTaskIncomplete(element);
 };
 
-const markAsCompleted = (element) => {
+const deleteTask = (e) => {
+  const element = e.target;
+  const task = deleteTaskFromStorage(element);
+  const taskContainer = element.closest(".task-container");
+  taskContainer.remove();
+};
+
+const markTaskComplete = (element) => {
   element.src = checkedImg;
 };
 
-const markAsIncomplete = (element) => {
+const markTaskIncomplete = (element) => {
   element.src = uncheckedImg;
 };
 
-const getParentList = (element) => {
+// used as a reference point for other functions
+const getParentListElement = (element) => {
   return element.closest(".list-container");
 };
 
+const getNewTaskText = (element) => {
+  const parentList = getParentListElement(element);
+  return parentList.querySelector("input").value;
+};
+
 const getListTitle = (element) => {
-  const parentList = getParentList(element);
+  const parentList = getParentListElement(element);
   return parentList.firstChild.textContent;
 };
 
-const getNewTaskText = (element) => {
-  const parentList = getParentList(element);
-  return parentList.querySelector("input").value;
+const getTaskDescription = (element) => {
+  return element.parentElement.children.item(1).textContent;
+};
+
+//
+// storage related functions
+//
+
+const getTaskFromStorage = (element) => {
+  const listTitle = getListTitle(element);
+  const taskDescription = getTaskDescription(element);
+  return Storage.getTaskFromList(taskDescription, listTitle);
+};
+
+const deleteTaskFromStorage = (element) => {
+  const listTitle = getListTitle(element);
+  const taskDescription = getTaskDescription(element);
+  Storage.deleteTaskFromList(taskDescription, listTitle);
 };
