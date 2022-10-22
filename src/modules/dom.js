@@ -1,3 +1,4 @@
+import "../scss/index.scss";
 import makeElement from "./utils/make-element";
 import containerize from "./utils/containerize";
 import header from "./header.js";
@@ -39,7 +40,7 @@ const renderMainContent = () => {
 const prepListElement = (listObj) => {
   const container = makeElement("div", "list-container");
   const title = makeElement("h2", "list-title", listObj.getName());
-  const addTaskContainer = prepAddTaskElements();
+  const addTaskContainer = prepAddNewTaskElements();
   const tasks = prepAllTaskElements(listObj.getTasks());
   container.appendChild(title);
   container.appendChild(addTaskContainer);
@@ -47,13 +48,14 @@ const prepListElement = (listObj) => {
   return container;
 };
 
-const prepAddTaskElements = () => {
-  const container = makeElement("div", "add-task-container");
+const prepAddNewTaskElements = () => {
+  const container = makeElement("div", "add-task-section");
+  const newTaskLabel = makeElement("label", "add-task-label", "Add task");
   const newTaskTextbox = makeElement(
     "input",
-    "new-task-textbox",
+    "add-task-textbox",
     "",
-    "new-task-textbox"
+    "add-task-textbox"
   );
   const addTaskBtn = makeElement("button", "add-task-btn");
   const addTaskImg = makeElement(
@@ -64,7 +66,11 @@ const prepAddTaskElements = () => {
     plusSignSVG
   );
   addTaskBtn.appendChild(addTaskImg);
-  return containerize(container, newTaskTextbox, addTaskBtn);
+  return containerize(
+    container,
+    newTaskLabel,
+    containerize("add-task-textbox-container", newTaskTextbox, addTaskBtn)
+  );
 };
 
 const prepAllTaskElements = (taskArray) => {
