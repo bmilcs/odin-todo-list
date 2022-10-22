@@ -108,11 +108,11 @@ const addTaskEvent = (e) => {
 
   // add new task to its corresponding object
   const listTitle = getListTitle(element);
-  const targetList = Storage.findList(listTitle);
-  targetList.addTask(description);
+  const listArray = Storage.findList(listTitle);
+  listArray.addTask(description);
 
   // create task elements & append it to the page
-  const taskElement = prepTaskElement(targetList.getLastTask());
+  const taskElement = prepTaskElement(listArray.getLastTask());
   const parentList = getParentListElement(element);
   parentList.appendChild(taskElement);
 };
@@ -121,11 +121,11 @@ const toggleTaskStatus = (e) => {
   const element = e.target;
 
   // update status in it's object
-  const task = getTaskFromStorage(element);
-  task.toggleStatus();
+  const taskObj = getTaskFromStorage(element);
+  taskObj.toggleStatus();
 
   // update dom w/ status
-  task.getStatus() === "Complete"
+  taskObj.getStatus() === "Complete"
     ? markTaskComplete(element)
     : markTaskIncomplete(element);
 };
