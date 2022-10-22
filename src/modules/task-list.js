@@ -1,4 +1,4 @@
-import Task from "./task"
+import Task from "./task";
 
 //
 // todo list: group of task components
@@ -10,19 +10,22 @@ export default function TaskList(name) {
   this.tasks = [];
 }
 
-TaskList.prototype.getTasks = function() {
+TaskList.prototype.getTasks = function () {
   return this.tasks;
-}
+};
 
-TaskList.prototype.getName = function() {
+TaskList.prototype.getLastTask = function () {
+  return this.tasks[this.tasks.length - 1];
+};
+
+TaskList.prototype.getName = function () {
   return this.name;
-}
+};
 
-TaskList.prototype.addTask = function(task, dueDate) {
+TaskList.prototype.addTask = function (task, dueDate) {
   this.tasks.push(new Task(task, dueDate));
-}
+};
 
-TaskList.prototype.deleteTask = function(index) {
+TaskList.prototype.deleteTask = function (index) {
   this.tasks.splice(index, 1);
-}
-
+};

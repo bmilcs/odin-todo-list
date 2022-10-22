@@ -71,12 +71,22 @@ const prepAddNewTaskSection = () => {
 };
 
 const addTaskEvent = (e) => {
-  // find current list's corresponding object
-  const listTitle = e.target.closest(".list-container").firstChild.textContent;
+  // find parent task list & it's title
+  const parentList = e.target.closest(".list-container");
+  const listTitle = parentList.firstChild.textContent;
 
-  alert(findList(listTitle));
+  // retrieve value for the new task
+  const newTaskDescription = parentList.querySelector("input").value;
+
+  // find the list's corresponding object by its title
+  const targetList = Storage.findList(listTitle);
+
   // add textbox value to object
-  // append to the page
+  targetList.addTask(newTaskDescription);
+
+  // append new task to the page
+  const taskElement = prepTaskElement(targetList.getLastTask());
+  parentList.appendChild(taskElement);
 };
 
 const prepAllTaskElements = (taskArray) => {
