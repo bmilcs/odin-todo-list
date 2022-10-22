@@ -1,7 +1,7 @@
 import Task from "./task"
 
 //
-// todo list: group of tasks (component)
+// todo list: group of task components
 // object role: aggregate
 //
 
