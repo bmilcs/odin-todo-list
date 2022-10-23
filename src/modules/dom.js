@@ -190,7 +190,6 @@ const prepTask = (task) => {
     editSVG
   );
   editIcon.addEventListener("click", editTaskDescriptionEvent);
-  container.addEventListener("dblclick", editTaskDescriptionEvent);
   deleteIcon.addEventListener("click", deleteTaskEvent);
   checkbox.addEventListener("click", toggleStatusEvent);
   return containerize(
@@ -266,28 +265,55 @@ const toggleStatusEvent = (e) => {
     : markTaskIncomplete(element);
 };
 
+const markTaskComplete = (element) => {
+  const taskContainer = getParentTaskContainer(element);
+  taskContainer.classList.add("completed");
+  element.src = checkboxFilledSVG;
+  const description = getTaskDescriptionElement(element);
+  description.style.textDecoration = "line-through";
+  description.style.fontStyle = "italic";
+};
+
+const markTaskIncomplete = (element) => {
+  const taskContainer = getParentTaskContainer(element);
+  taskContainer.classList.remove("completed");
+  element.src = checkboxEmptySVG;
+  const description = getTaskDescriptionElement(element);
+  description.style.textDecoration = "none";
+  description.style.fontStyle = "normal";
+};
+
 const editTaskDescriptionEvent = (e) => {
-  const element = e.target;
-  const input = getTaskDescriptionElement(element);
+  const editIcon = e.target;
+  const input = getTaskDescriptionElement(editIcon);
   const originalValue = input.value;
 
   input.disabled = false;
   input.focus();
 
-  // on pressing "enter":
+  const taskContainer = getParentTaskContainer(editIcon);
+  taskContainer.classList.add("edit-task-mode");
+
+  // pressing "enter" or clicking edit icon while in edit mode
   const submitEditedDescription = (e) => {
-    const element = e.target;
-    if (e.key === "Enter") {
+    if (e.key === "Enter" || e.target === editIcon) {
       input.disabled = true;
+      taskContainer.classList.remove("edit-task-mode");
+
       const newValue = input.value;
       if (newValue !== originalValue) {
-        const listTitle = getListTitle(element);
+        const listTitle = getListTitle(editIcon);
         changeTaskDescriptionInStorage(originalValue, newValue, listTitle);
       }
-      element.removeEventListener("keydown", submitEditedDescription);
+      editIcon.removeEventListener("click", submitEditedDescription);
+      input.removeEventListener("keydown", submitEditedDescription);
+      editIcon.addEventListener("click", editTaskDescriptionEvent, {
+        once: true,
+      });
     }
   };
-
+  editIcon.removeEventListener("click", editTaskDescriptionEvent);
+  editIcon.addEventListener("click", submitEditedDescription);
   input.addEventListener("keydown", submitEditedDescription);
 };
 
@@ -296,7 +322,7 @@ const deleteTaskEvent = (e) => {
   const listTitle = getListTitle(element);
   const taskDescription = getTaskDescription(element);
   deleteTaskFromStorage(taskDescription, listTitle);
-  const taskContainer = element.closest(".task-container");
+  const taskContainer = getParentTaskContainer(element);
   taskContainer.remove();
 };
 
@@ -314,23 +340,13 @@ const clearSidebar = () => clearContainer(main.sidebar);
 
 const clearMainContent = () => clearContainer(main.content);
 
-const markTaskComplete = (element) => {
-  element.src = checkboxFilledSVG;
-  const description = getTaskDescriptionElement(element);
-  description.style.textDecoration = "line-through";
-  description.style.fontStyle = "italic";
-};
-
-const markTaskIncomplete = (element) => {
-  element.src = checkboxEmptySVG;
-  const description = getTaskDescriptionElement(element);
-  description.style.textDecoration = "none";
-  description.style.fontStyle = "normal";
-};
-
 // used as a reference point for other functions
 const getParentListElement = (element) => {
   return element.closest(".list-container");
+};
+
+const getParentTaskContainer = (element) => {
+  return element.closest(".task-container");
 };
 
 const getListTitle = (element) => {
