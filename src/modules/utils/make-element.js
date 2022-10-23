@@ -1,4 +1,10 @@
-export default function makeElement(type, classes, textContentOrAlt, id, srcOrHref) {
+export default function makeElement(
+  type,
+  classes,
+  textContentOrAltOrValue,
+  id,
+  srcOrHref
+) {
   // minimum requirements: element type
   if (!type) return;
 
@@ -8,9 +14,9 @@ export default function makeElement(type, classes, textContentOrAlt, id, srcOrHr
   if (classes) classes.split(" ").forEach((cls) => element.classList.add(cls));
 
   // add alt text if img OR textContent for everything else
-  type === "img"
-    ? (element.alt = textContentOrAlt)
-    : (element.textContent = textContentOrAlt);
+  if (type === "img") element.alt = textContentOrAltOrValue;
+  else if (type === "input") element.value = textContentOrAltOrValue;
+  else element.textContent = textContentOrAltOrValue;
 
   // if img set src OR if a set href
   if (type === "img") element.src = srcOrHref;
