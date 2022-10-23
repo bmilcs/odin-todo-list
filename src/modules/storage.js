@@ -28,10 +28,23 @@ const deleteTaskFromList = (description, listTitle) => {
 };
 
 const addSampleData = () => {
-  const list = new TaskList("Default List");
+  // List #1
+  const list = new TaskList("Web Development");
   list.addTask("Finish my todo list project", "11/2/2022");
   list.addTask("Complete Odin Project", "1/1/2023");
   addList(list);
+  // List #2
+  const list2 = new TaskList("Home Renovation");
+  list2.addTask("Install living room windows", "1/1/2023");
+  list2.addTask(
+    "Spray foam insulation in window rough opening gaps",
+    "1/1/2023"
+  );
+  list2.addTask("Cut & install window casing", "1/1/2023");
+  list2.addTask("Prime window trim", "1/1/2023");
+  list2.addTask("Caulk interior & exterior", "1/1/2023");
+  list2.addTask("Paint window trim", "1/1/2023");
+  addList(list2);
 };
 
 export {

@@ -27,7 +27,7 @@ input {
   font: inherit;
   padding: 0.25rem 0.5rem;
   border: none;
-  border: 2px solid var(--clr-neutral-300);
+  border-bottom: 2px solid var(--clr-neutral-300);
   border-radius: var(--border-radius);
   outline: none;
 }
@@ -92,6 +92,7 @@ body {
 .list-container {
   max-width: 80ch;
   padding: 1rem;
+  margin-bottom: 1rem;
 
   outline: 1px solid var(--clr-neutral-200);
 

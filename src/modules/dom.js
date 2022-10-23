@@ -39,9 +39,11 @@ const renderSidebar = () => {
 
 const renderMainContent = () => {
   Storage.addSampleData();
-  const sampleData = Storage.findList("Default List");
-  const sampleElements = prepTodoListElements(sampleData);
-  main.content.appendChild(sampleElements);
+  const allLists = Storage.getLists();
+  allLists.forEach((list) => {
+    const todoList = prepTodoListElements(list);
+    main.content.appendChild(todoList);
+  });
 };
 
 const prepTodoListElements = (listObj) => {
