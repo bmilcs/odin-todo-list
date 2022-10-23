@@ -28,7 +28,6 @@ input {
   padding: 0.25rem 0.5rem;
   border: none;
   border-bottom: 2px solid var(--clr-neutral-300);
-  border-radius: var(--border-radius);
   outline: none;
 }
 
@@ -76,16 +75,31 @@ body {
 
 .sidebar {
   max-width: 25ch;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 
   // all children
   > * {
     padding-block: 1rem;
+    display: block;
   }
 
   h2 {
     color: var(--clr-neutral-800);
     background: var(--clr-neutral-200);
     padding: 0.5em 1em;
+  }
+
+  button {
+    border: 1px solid var(--clr-neutral-200);
+    border-radius: var(--border-radius);
+    background: none;
+    font-weight: 600;
+
+    &:hover {
+      background: var(--clr-neutral-200);
+    }
   }
 }
 

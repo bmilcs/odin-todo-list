@@ -3,7 +3,9 @@ import TaskList from "./task-list";
 const Storage = [];
 
 const addList = (list) => {
-  Storage.push(list);
+  const newList = new TaskList(list);
+  Storage.push(newList);
+  return newList;
 };
 
 const getLists = () => {
@@ -27,14 +29,14 @@ const deleteTaskFromList = (description, listTitle) => {
   taskList.deleteTask(description);
 };
 
-const addSampleData = () => {
+const generateSampleData = () => {
   // List #1
-  const list = new TaskList("Web Development");
+  const list = addList("Web Development");
   list.addTask("Finish my todo list project", "11/2/2022");
   list.addTask("Complete Odin Project", "1/1/2023");
-  addList(list);
+
   // List #2
-  const list2 = new TaskList("Home Renovation");
+  const list2 = addList("Home Renovation");
   list2.addTask("Install living room windows", "1/1/2023");
   list2.addTask(
     "Spray foam insulation in window rough opening gaps",
@@ -43,8 +45,7 @@ const addSampleData = () => {
   list2.addTask("Cut & install window casing", "1/1/2023");
   list2.addTask("Prime window trim", "1/1/2023");
   list2.addTask("Caulk interior & exterior", "1/1/2023");
-  list2.addTask("Paint window trim", "1/1/2023");
-  addList(list2);
+  list2.addTask("Paint window", "1/1/2023");
 };
 
 export {
@@ -53,5 +54,5 @@ export {
   findList,
   getTaskFromList,
   deleteTaskFromList,
-  addSampleData,
+  generateSampleData as generateSampleData,
 };

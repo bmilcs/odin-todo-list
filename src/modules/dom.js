@@ -15,9 +15,10 @@ import checkboxEmptySVG from "../assets/unchecked.svg";
 //
 
 export const renderPage = () => {
+  Storage.generateSampleData();
   renderLayout();
   renderSidebar();
-  renderMainContent();
+  renderAllProjects();
 };
 
 const renderLayout = () => {
@@ -27,26 +28,78 @@ const renderLayout = () => {
 };
 
 const renderSidebar = () => {
-  const title = makeElement("h2", "sidebar-title", "Sidebar Title");
-  const p = makeElement(
-    "p",
-    "sidebar-p",
-    "Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat."
-  );
-  main.sidebar.appendChild(title);
-  main.sidebar.appendChild(p);
+  const sidebarElements = [];
+  sidebarElements.push(makeElement("h2", "sidebar-title", "Projects"));
+  const swapProjectButtons = prepNavigationButtons();
+  swapProjectButtons.forEach((btn) => sidebarElements.push(btn));
+  sidebarElements.push(prepAddProject());
+  sidebarElements.forEach((ele) => main.sidebar.appendChild(ele));
 };
 
-const renderMainContent = () => {
-  Storage.addSampleData();
+const prepNavigationButtons = () => {
+  const navigation = [];
+  const lists = Storage.getLists();
+  const viewAll = makeElement("button", "nav-button", "View All");
+  viewAll.addEventListener("click", swapProjectEvent);
+  const listElements = lists.map((list) => {
+    const button = makeElement("button", "nav-button", list.getName());
+    button.addEventListener("click", swapProjectEvent);
+    return button;
+  });
+  navigation.push(viewAll);
+  navigation.push(...listElements);
+  return navigation;
+};
+
+const prepAddProject = () => {
+  const container = makeElement("div", "add-new-project-container");
+  const label = makeElement("label", "add-project-label", "Add Project");
+  const textbox = makeElement(
+    "input",
+    "add-project-textbox",
+    "",
+    "add-project-textbox"
+  );
+  const button = makeElement("button", "add-project-btn");
+  const image = makeElement(
+    "img",
+    "add-project-img",
+    "Add Task",
+    "",
+    plusSignSVG
+  );
+  button.appendChild(image);
+  button.addEventListener("click", addProjectEvent);
+  textbox.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") addProjectEvent(e);
+  });
+  return containerize(
+    container,
+    label,
+    containerize("add-project-textbox-container", textbox, button)
+  );
+};
+
+const renderAllProjects = () => {
+  clearContainer(main.content);
   const allLists = Storage.getLists();
   allLists.forEach((list) => {
-    const todoList = prepTodoListElements(list);
-    main.content.appendChild(todoList);
+    const todoListElements = prepTodoLists(list);
+    main.content.appendChild(todoListElements);
   });
 };
 
-const prepTodoListElements = (listObj) => {
+const renderProject = (list) => {
+  clearContainer(main.content);
+  renderList(list);
+};
+
+const renderList = (list) => {
+  const todoListElements = prepTodoLists(list);
+  main.content.appendChild(todoListElements);
+};
+
+const prepTodoLists = (listObj) => {
   const container = makeElement("div", "list-container");
   const title = makeElement("h2", "list-title", listObj.getName());
   const addTask = prepAddNewTask();
@@ -109,6 +162,23 @@ const prepTaskElement = (task) => {
 // event handler callback functions
 //
 
+const swapProjectEvent = (e) => {
+  const listToDisplay = e.target.textContent;
+
+  if (listToDisplay === "View All") renderAllProjects();
+  else renderProject(findProjectInStorage(listToDisplay));
+};
+
+const addProjectEvent = (e) => {
+  const element = e.target;
+  const projectName = getNewProjectName(element);
+  addNewProjectToStorage(projectName);
+
+  clearContainer(main.sidebar);
+  renderSidebar();
+  return makeElement("p", "", "hi");
+};
+
 const addTaskEvent = (e) => {
   const element = e.target;
   const textbox = getNewTaskTextbox(element);
@@ -153,6 +223,12 @@ const deleteTask = (e) => {
 // utility functions
 //
 
+const clearContainer = (element) => {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+};
+
 const markTaskComplete = (element) => {
   element.src = checkboxFilledSVG;
   const description = getTaskDescriptionElement(element);
@@ -170,6 +246,10 @@ const markTaskIncomplete = (element) => {
 // used as a reference point for other functions
 const getParentListElement = (element) => {
   return element.closest(".list-container");
+};
+
+const getNewProjectName = (element) => {
+  return element.closest("div").firstChild.value;
 };
 
 const getNewTaskTextbox = (element) => {
@@ -193,6 +273,14 @@ const getTaskDescriptionElement = (element) => {
 //
 // storage related functions
 //
+
+const addNewProjectToStorage = (name) => {
+  Storage.addList(name);
+};
+
+const findProjectInStorage = (name) => {
+  return Storage.findList(name);
+};
 
 const getTaskFromStorage = (element) => {
   const listTitle = getListTitle(element);
