@@ -190,8 +190,9 @@ const prepTask = (task) => {
     editSVG
   );
   editIcon.addEventListener("click", editTaskDescriptionEvent);
-  deleteIcon.addEventListener("click", deleteTask);
-  checkbox.addEventListener("click", toggleTaskStatus);
+  container.addEventListener("dblclick", editTaskDescriptionEvent);
+  deleteIcon.addEventListener("click", deleteTaskEvent);
+  checkbox.addEventListener("click", toggleStatusEvent);
   return containerize(
     container,
     checkbox,
@@ -249,7 +250,7 @@ const addTaskEvent = (e) => {
   textbox.value = "";
 };
 
-const toggleTaskStatus = (e) => {
+const toggleStatusEvent = (e) => {
   const element = e.target;
 
   // update status of the task in storage
@@ -290,7 +291,7 @@ const editTaskDescriptionEvent = (e) => {
   input.addEventListener("keydown", submitEditedDescription);
 };
 
-const deleteTask = (e) => {
+const deleteTaskEvent = (e) => {
   const element = e.target;
   const listTitle = getListTitle(element);
   const taskDescription = getTaskDescription(element);

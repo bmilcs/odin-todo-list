@@ -91,7 +91,7 @@ body {
     padding: 0.5em 1em;
   }
 
-  button {
+  button:not(.add-project-btn) {
     border: 1px solid var(--clr-neutral-200);
     border-radius: var(--border-radius);
     background: none;
@@ -127,18 +127,19 @@ body {
     > * {
       flex: 1;
     }
+  }
+}
 
-    .add-task-btn {
-      background: none;
-      border: 0;
-      border-radius: 50%;
-      max-width: 2rem;
-      aspect-ratio: 1/1;
+.add-task-btn,
+.add-project-btn {
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  max-width: 2rem;
+  aspect-ratio: 1/1;
 
-      &:hover {
-        background-color: var(--clr-neutral-200);
-      }
-    }
+  &:hover {
+    background-color: var(--clr-neutral-200);
   }
 }
 
@@ -152,6 +153,20 @@ body {
   margin-block: 0.5rem;
   background: var(--clr-neutral-200);
   border-radius: var(--border-radius);
+
+  input {
+    width: 100%;
+    color: var(--clr-neutral-900);
+  }
+
+  input:disabled {
+    border: 0;
+  }
+
+  input:not(disabled) {
+    background: 0;
+    outline-bottom: 2px solid var(--clr-neutral-800);
+  }
 
   & :nth-child(3) {
     margin-left: auto;
