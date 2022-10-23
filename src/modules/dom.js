@@ -28,27 +28,65 @@ const renderLayout = () => {
 };
 
 const renderSidebar = () => {
-  const sidebarElements = [];
-  sidebarElements.push(makeElement("h2", "sidebar-title", "Projects"));
-  const swapProjectButtons = prepNavigationButtons();
-  swapProjectButtons.forEach((btn) => sidebarElements.push(btn));
-  sidebarElements.push(prepAddProject());
-  sidebarElements.forEach((ele) => main.sidebar.appendChild(ele));
+  const elements = [];
+  // add title: "Projects"
+  elements.push(makeElement("h2", "sidebar-title", "Projects"));
+  // add array of project buttons
+  const swapProjectButtonsArray = prepSwapProjectButtons();
+  swapProjectButtonsArray.forEach((btn) => elements.push(btn));
+  // add "add project" section
+  const addProject = prepAddProject();
+  elements.push(addProject);
+  // render elements to the sidebar
+  elements.forEach((ele) => main.sidebar.appendChild(ele));
 };
 
-const prepNavigationButtons = () => {
-  const navigation = [];
-  const lists = Storage.getLists();
-  const viewAll = makeElement("button", "nav-button", "View All");
-  viewAll.addEventListener("click", swapProjectEvent);
-  const listElements = lists.map((list) => {
-    const button = makeElement("button", "nav-button", list.getName());
+const prepSwapProjectButtons = () => {
+  const elements = [];
+  // create a 'view all' projects button
+  const viewAllBtn = makeElement("button", "nav-button", "View All");
+  viewAllBtn.addEventListener("click", swapProjectEvent);
+  elements.push(viewAllBtn);
+  // create array of buttons for each project
+  const projectsArray = getAllListsFromStorage();
+  const swapProjectBtnsArray = projectsArray.map((listObj) => {
+    const listName = listObj.getName();
+    const button = makeElement("button", "nav-button", listName);
     button.addEventListener("click", swapProjectEvent);
     return button;
   });
-  navigation.push(viewAll);
-  navigation.push(...listElements);
-  return navigation;
+  elements.push(...swapProjectBtnsArray);
+  return elements;
+};
+
+const swapProjectEvent = (e) => {
+  // swap to project on button click
+  const projectName = e.target.textContent;
+  projectName === "View All"
+    ? renderAllProjects()
+    : renderOneProject(getProjectFromStorage(projectName));
+};
+
+const renderAllProjects = () => {
+  // triggered on first page load & 'view all' button click
+  clearMainContent();
+  const allListObjs = getAllListsFromStorage();
+  allListObjs.forEach((listObj) => {
+    renderTaskList(listObj);
+  });
+};
+
+const renderOneProject = (listObj) => {
+  // triggered on a single project view
+  clearMainContent();
+  renderTaskList(listObj);
+};
+
+const renderTaskList = (listObj) => {
+  // used by display one & all project buttons
+  // prevents clearing page on renderAllProjects
+  const elements = prepProjectView(listObj);
+  main.content.appendChild(elements);
 };
 
 const prepAddProject = () => {
@@ -64,7 +102,7 @@ const prepAddProject = () => {
   const image = makeElement(
     "img",
     "add-project-img",
-    "Add Task",
+    "Add Project",
     "",
     plusSignSVG
   );
@@ -80,34 +118,65 @@ const prepAddProject = () => {
   );
 };
 
-const renderAllProjects = () => {
-  clearContainer(main.content);
-  const allLists = Storage.getLists();
-  allLists.forEach((list) => {
-    const todoListElements = prepTodoLists(list);
-    main.content.appendChild(todoListElements);
-  });
+const addProjectEvent = (e) => {
+  const element = e.target;
+  const projectName = element.closest("div").firstChild.value;
+  // prevent empty & duplicate list names
+  const allProjects = getAllListsFromStorage();
+  const allProjectNames = allProjects.map((project) => project.name);
+  if (
+    projectName === "" ||
+    projectName === null ||
+    projectName === "View All" ||
+    allProjectNames.some((name) => projectName === name)
+  )
+    return;
+  // project doesn't eixst
+  addNewProjectToStorage(projectName);
+  clearSidebar();
+  renderSidebar();
+
+  // display new project in main.content
+  const newProjectObj = getProjectFromStorage(projectName);
+  renderOneProject(newProjectObj);
 };
 
-const renderProject = (list) => {
-  clearContainer(main.content);
-  renderList(list);
-};
-
-const renderList = (list) => {
-  const todoListElements = prepTodoLists(list);
-  main.content.appendChild(todoListElements);
-};
-
-const prepTodoLists = (listObj) => {
+const prepProjectView = (listObj) => {
   const container = makeElement("div", "list-container");
-  const title = makeElement("h2", "list-title", listObj.getName());
+  const listName = listObj.getName();
+  const titleBar = makeElement("h2", "list-title", listName);
+  container.appendChild(titleBar);
   const addTask = prepAddNewTask();
-  const tasks = prepAllTaskElements(listObj.getTasks());
-  container.appendChild(title);
   container.appendChild(addTask);
-  tasks.forEach((element) => container.appendChild(element));
+  const tasksArray = listObj.getTasks();
+  const taskElements = prepAllTasks(tasksArray);
+  taskElements.forEach((element) => container.appendChild(element));
   return container;
+};
+
+const prepAllTasks = (tasksArray) => {
+  return tasksArray.map((task) => prepTask(task));
+};
+
+const prepTask = (task) => {
+  const container = makeElement("div", "task-container");
+  const checkbox = makeElement(
+    "img",
+    "task-status unchecked",
+    "",
+    "",
+    checkboxEmptySVG
+  );
+  const description = makeElement(
+    "p",
+    "task-description",
+    task.getDescription()
+  );
+  const dueDate = makeElement("p", "task-date", task.getDate());
+  const deleteIcon = makeElement("img", "delete-task", "", "", deleteSVG);
+  deleteIcon.addEventListener("click", deleteTask);
+  checkbox.addEventListener("click", toggleTaskStatus);
+  return containerize(container, checkbox, description, dueDate, deleteIcon);
 };
 
 const prepAddNewTask = () => {
@@ -133,55 +202,14 @@ const prepAddNewTask = () => {
   );
 };
 
-const prepAllTaskElements = (tasksArray) => {
-  return tasksArray.map((task) => prepTaskElement(task));
-};
-
-const prepTaskElement = (task) => {
-  const container = makeElement("div", "task-container");
-  const checkbox = makeElement(
-    "img",
-    "task-status unchecked",
-    "",
-    "",
-    checkboxEmptySVG
-  );
-  const description = makeElement(
-    "p",
-    "task-description",
-    task.getDescription()
-  );
-  const dueDate = makeElement("p", "task-date", task.getDate());
-  const deleteIcon = makeElement("img", "delete-task", "", "", deleteSVG);
-  deleteIcon.addEventListener("click", deleteTask);
-  checkbox.addEventListener("click", toggleTaskStatus);
-  return containerize(container, checkbox, description, dueDate, deleteIcon);
-};
-
 //
 // event handler callback functions
 //
 
-const swapProjectEvent = (e) => {
-  const listToDisplay = e.target.textContent;
-
-  if (listToDisplay === "View All") renderAllProjects();
-  else renderProject(findProjectInStorage(listToDisplay));
-};
-
-const addProjectEvent = (e) => {
-  const element = e.target;
-  const projectName = getNewProjectName(element);
-  addNewProjectToStorage(projectName);
-
-  clearContainer(main.sidebar);
-  renderSidebar();
-  return makeElement("p", "", "hi");
-};
-
 const addTaskEvent = (e) => {
   const element = e.target;
-  const textbox = getNewTaskTextbox(element);
+  const parentList = getParentListElement(element);
+  const textbox = parentList.querySelector("input");
 
   // make sure text was entered
   const description = textbox.value;
@@ -189,12 +217,11 @@ const addTaskEvent = (e) => {
 
   // add new task to storage
   const listTitle = getListTitle(element);
-  const tasksArray = Storage.findList(listTitle);
+  const tasksArray = getProjectFromStorage(listTitle);
   tasksArray.addTask(description);
 
   // create task elements & append it to the page
-  const taskElement = prepTaskElement(tasksArray.getLastTask());
-  const parentList = getParentListElement(element);
+  const taskElement = prepTask(tasksArray.getLastTask());
   parentList.appendChild(taskElement);
   textbox.value = "";
 };
@@ -203,7 +230,10 @@ const toggleTaskStatus = (e) => {
   const element = e.target;
 
   // update status of the task in storage
-  const taskObj = getTaskFromStorage(element);
+  const listTitle = getListTitle(element);
+  const taskDescription = getTaskDescription(element);
+
+  const taskObj = getTaskFromStorage(taskDescription, listTitle);
   taskObj.toggleStatus();
 
   // change icon to reflect its status
@@ -214,7 +244,9 @@ const toggleTaskStatus = (e) => {
 
 const deleteTask = (e) => {
   const element = e.target;
-  deleteTaskFromStorage(element);
+  const listTitle = getListTitle(element);
+  const taskDescription = getTaskDescription(element);
+  deleteTaskFromStorage(taskDescription, listTitle);
   const taskContainer = element.closest(".task-container");
   taskContainer.remove();
 };
@@ -228,6 +260,10 @@ const clearContainer = (element) => {
     element.removeChild(element.firstChild);
   }
 };
+
+const clearSidebar = () => clearContainer(main.sidebar);
+
+const clearMainContent = () => clearContainer(main.content);
 
 const markTaskComplete = (element) => {
   element.src = checkboxFilledSVG;
@@ -246,15 +282,6 @@ const markTaskIncomplete = (element) => {
 // used as a reference point for other functions
 const getParentListElement = (element) => {
   return element.closest(".list-container");
-};
-
-const getNewProjectName = (element) => {
-  return element.closest("div").firstChild.value;
-};
-
-const getNewTaskTextbox = (element) => {
-  const parentList = getParentListElement(element);
-  return parentList.querySelector("input");
 };
 
 const getListTitle = (element) => {
@@ -278,18 +305,18 @@ const addNewProjectToStorage = (name) => {
   Storage.addList(name);
 };
 
-const findProjectInStorage = (name) => {
+const getProjectFromStorage = (name) => {
   return Storage.findList(name);
 };
 
-const getTaskFromStorage = (element) => {
-  const listTitle = getListTitle(element);
-  const taskDescription = getTaskDescription(element);
+const getAllListsFromStorage = () => {
+  return Storage.getLists();
+};
+
+const getTaskFromStorage = (taskDescription, listTitle) => {
   return Storage.getTaskFromList(taskDescription, listTitle);
 };
 
-const deleteTaskFromStorage = (element) => {
-  const listTitle = getListTitle(element);
-  const taskDescription = getTaskDescription(element);
+const deleteTaskFromStorage = (taskDescription, listTitle) => {
   Storage.deleteTaskFromList(taskDescription, listTitle);
 };
