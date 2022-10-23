@@ -9,6 +9,7 @@ import plusSignSVG from "../assets/add.svg";
 import deleteSVG from "../assets/delete.svg";
 import checkboxFilledSVG from "../assets/checked.svg";
 import checkboxEmptySVG from "../assets/unchecked.svg";
+import editSVG from "../assets/edit.svg";
 
 //
 // creating & rendering elements
@@ -167,16 +168,38 @@ const prepTask = (task) => {
     "",
     checkboxEmptySVG
   );
-  const description = makeElement(
-    "p",
-    "task-description",
+  const descriptionInput = makeElement(
+    "input",
+    "task-description-input",
     task.getDescription()
   );
+  descriptionInput.disabled = true;
   const dueDate = makeElement("p", "task-date", task.getDate());
-  const deleteIcon = makeElement("img", "delete-task", "", "", deleteSVG);
+  const deleteIcon = makeElement(
+    "img",
+    "delete-task",
+    "Delete Task",
+    "",
+    deleteSVG
+  );
+  const editIcon = makeElement(
+    "img",
+    "edit-task-description",
+    "Edit Task Description",
+    "",
+    editSVG
+  );
+  editIcon.addEventListener("click", editTaskDescriptionEvent);
   deleteIcon.addEventListener("click", deleteTask);
   checkbox.addEventListener("click", toggleTaskStatus);
-  return containerize(container, checkbox, description, dueDate, deleteIcon);
+  return containerize(
+    container,
+    checkbox,
+    descriptionInput,
+    dueDate,
+    editIcon,
+    deleteIcon
+  );
 };
 
 const prepAddNewTask = () => {
@@ -242,6 +265,31 @@ const toggleTaskStatus = (e) => {
     : markTaskIncomplete(element);
 };
 
+const editTaskDescriptionEvent = (e) => {
+  const element = e.target;
+  const input = getTaskDescriptionElement(element);
+  const originalValue = input.value;
+
+  input.disabled = false;
+  input.focus();
+
+  // on pressing "enter":
+  const submitEditedDescription = (e) => {
+    const element = e.target;
+    if (e.key === "Enter") {
+      input.disabled = true;
+      const newValue = input.value;
+      if (newValue !== originalValue) {
+        const listTitle = getListTitle(element);
+        changeTaskDescriptionInStorage(originalValue, newValue, listTitle);
+      }
+      element.removeEventListener("keydown", submitEditedDescription);
+    }
+  };
+
+  input.addEventListener("keydown", submitEditedDescription);
+};
+
 const deleteTask = (e) => {
   const element = e.target;
   const listTitle = getListTitle(element);
@@ -290,7 +338,7 @@ const getListTitle = (element) => {
 };
 
 const getTaskDescription = (element) => {
-  return element.parentElement.children.item(1).textContent;
+  return element.parentElement.children.item(1).value;
 };
 
 const getTaskDescriptionElement = (element) => {
@@ -319,4 +367,9 @@ const getTaskFromStorage = (taskDescription, listTitle) => {
 
 const deleteTaskFromStorage = (taskDescription, listTitle) => {
   Storage.deleteTaskFromList(taskDescription, listTitle);
+};
+
+const changeTaskDescriptionInStorage = (originalValue, newValue, listTitle) => {
+  const listObj = getTaskFromStorage(originalValue, listTitle);
+  listObj.description = newValue;
 };
