@@ -7,8 +7,12 @@ import main from "./main";
 import * as Storage from "./storage";
 import plusSignSVG from "../assets/add.svg";
 import deleteSVG from "../assets/delete.svg";
-import checkedImg from "../assets/checked.svg";
-import uncheckedImg from "../assets/unchecked.svg";
+import checkboxFilledSVG from "../assets/checked.svg";
+import checkboxEmptySVG from "../assets/unchecked.svg";
+
+//
+// creating & rendering elements
+//
 
 export const renderPage = () => {
   renderLayout();
@@ -36,14 +40,14 @@ const renderSidebar = () => {
 const renderMainContent = () => {
   Storage.addSampleData();
   const sampleData = Storage.findList("Default List");
-  const sampleTodo = prepTodoListElements(sampleData);
-  main.content.appendChild(sampleTodo);
+  const sampleElements = prepTodoListElements(sampleData);
+  main.content.appendChild(sampleElements);
 };
 
 const prepTodoListElements = (listObj) => {
   const container = makeElement("div", "list-container");
   const title = makeElement("h2", "list-title", listObj.getName());
-  const addTask = prepAddNewTaskSection();
+  const addTask = prepAddNewTask();
   const tasks = prepAllTaskElements(listObj.getTasks());
   container.appendChild(title);
   container.appendChild(addTask);
@@ -51,7 +55,7 @@ const prepTodoListElements = (listObj) => {
   return container;
 };
 
-const prepAddNewTaskSection = () => {
+const prepAddNewTask = () => {
   const container = makeElement("div", "add-task-section");
   const label = makeElement("label", "add-task-label", "Add task");
   const textbox = makeElement(
@@ -74,8 +78,8 @@ const prepAddNewTaskSection = () => {
   );
 };
 
-const prepAllTaskElements = (taskArray) => {
-  return taskArray.map((task) => prepTaskElement(task));
+const prepAllTaskElements = (tasksArray) => {
+  return tasksArray.map((task) => prepTaskElement(task));
 };
 
 const prepTaskElement = (task) => {
@@ -85,7 +89,7 @@ const prepTaskElement = (task) => {
     "task-status unchecked",
     "",
     "",
-    uncheckedImg
+    checkboxEmptySVG
   );
   const description = makeElement(
     "p",
@@ -99,32 +103,38 @@ const prepTaskElement = (task) => {
   return containerize(container, checkbox, description, dueDate, deleteIcon);
 };
 
+//
+// event handler callback functions
+//
+
 const addTaskEvent = (e) => {
   const element = e.target;
+  const textbox = getNewTaskTextbox(element);
 
   // make sure text was entered
-  const description = getNewTaskText(element);
+  const description = textbox.value;
   if (description === "") return;
 
-  // add new task to its corresponding object
+  // add new task to storage
   const listTitle = getListTitle(element);
-  const listArray = Storage.findList(listTitle);
-  listArray.addTask(description);
+  const tasksArray = Storage.findList(listTitle);
+  tasksArray.addTask(description);
 
   // create task elements & append it to the page
-  const taskElement = prepTaskElement(listArray.getLastTask());
+  const taskElement = prepTaskElement(tasksArray.getLastTask());
   const parentList = getParentListElement(element);
   parentList.appendChild(taskElement);
+  textbox.value = "";
 };
 
 const toggleTaskStatus = (e) => {
   const element = e.target;
 
-  // update status in it's object
+  // update status of the task in storage
   const taskObj = getTaskFromStorage(element);
   taskObj.toggleStatus();
 
-  // update dom w/ status
+  // change icon to reflect its status
   taskObj.getStatus() === "Complete"
     ? markTaskComplete(element)
     : markTaskIncomplete(element);
@@ -137,12 +147,22 @@ const deleteTask = (e) => {
   taskContainer.remove();
 };
 
+//
+// utility functions
+//
+
 const markTaskComplete = (element) => {
-  element.src = checkedImg;
+  element.src = checkboxFilledSVG;
+  const description = getTaskDescriptionElement(element);
+  description.style.textDecoration = "line-through";
+  description.style.fontStyle = "italic";
 };
 
 const markTaskIncomplete = (element) => {
-  element.src = uncheckedImg;
+  element.src = checkboxEmptySVG;
+  const description = getTaskDescriptionElement(element);
+  description.style.textDecoration = "none";
+  description.style.fontStyle = "normal";
 };
 
 // used as a reference point for other functions
@@ -150,9 +170,9 @@ const getParentListElement = (element) => {
   return element.closest(".list-container");
 };
 
-const getNewTaskText = (element) => {
+const getNewTaskTextbox = (element) => {
   const parentList = getParentListElement(element);
-  return parentList.querySelector("input").value;
+  return parentList.querySelector("input");
 };
 
 const getListTitle = (element) => {
@@ -162,6 +182,10 @@ const getListTitle = (element) => {
 
 const getTaskDescription = (element) => {
   return element.parentElement.children.item(1).textContent;
+};
+
+const getTaskDescriptionElement = (element) => {
+  return element.parentElement.children.item(1);
 };
 
 //
