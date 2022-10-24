@@ -10,6 +10,7 @@ import deleteSVG from "../assets/delete.svg";
 import checkboxFilledSVG from "../assets/checked.svg";
 import checkboxEmptySVG from "../assets/unchecked.svg";
 import editSVG from "../assets/edit.svg";
+import arrowSVG from "../assets/arrow.svg";
 
 //
 // creating & rendering elements
@@ -24,7 +25,7 @@ export const renderPage = () => {
 
 const renderLayout = () => {
   const body = document.querySelector("body");
-  const elements = [header, main.parent, footer];
+  const elements = [header, main.sidebar, main.content, footer];
   elements.forEach((element) => body.appendChild(element));
 };
 
@@ -33,7 +34,7 @@ const renderSidebar = () => {
   // add title: "Projects"
   elements.push(makeElement("h2", "sidebar-title", "Projects"));
   // add array of project buttons
-  const swapProjectButtonsArray = prepSwapProjectButtons();
+  const swapProjectButtonsArray = prepAllProjectButtons();
   swapProjectButtonsArray.forEach((btn) => elements.push(btn));
   // add "add project" section
   const addProject = prepAddProject();
@@ -42,22 +43,27 @@ const renderSidebar = () => {
   elements.forEach((ele) => main.sidebar.appendChild(ele));
 };
 
-const prepSwapProjectButtons = () => {
+const prepAllProjectButtons = () => {
   const elements = [];
-  // create a 'view all' projects button
-  const viewAllBtn = makeElement("button", "nav-button", "View All");
-  viewAllBtn.addEventListener("click", swapProjectEvent);
+  const viewAllBtn = prepProjectButton("View All");
   elements.push(viewAllBtn);
   // create array of buttons for each project
   const projectsArray = getAllListsFromStorage();
-  const swapProjectBtnsArray = projectsArray.map((listObj) => {
+  projectsArray.forEach((listObj) => {
     const listName = listObj.getName();
-    const button = makeElement("button", "nav-button", listName);
-    button.addEventListener("click", swapProjectEvent);
-    return button;
+    elements.push(prepProjectButton(listName));
   });
-  elements.push(...swapProjectBtnsArray);
   return elements;
+};
+
+const prepProjectButton = (name) => {
+  const button = makeElement("button", "nav-button");
+  const arrowIcon = makeElement("img", "arrow-svg", "", "", arrowSVG);
+  const p = makeElement("p", "button-p", name);
+  button.appendChild(arrowIcon);
+  button.appendChild(p);
+  button.addEventListener("click", swapProjectEvent);
+  return button;
 };
 
 const swapProjectEvent = (e) => {
