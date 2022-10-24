@@ -5,6 +5,8 @@ Welcome to Bryan Miller's Todo List Project, the [eleventh assignment](https://w
 - SOLID Design Principles
 - Vanilla JavaScript
 - `npm` & `webpack`
+  - `date-fns`
+  - `production` & `development` configs
 - ES6 Modules
 - SASS
 - VIM: Neovim (First Project)
@@ -30,5 +32,5 @@ git clone https://github.com/bmilcs/odin-restaurant-page.git
 
 # install dev dependencies
 cd odin-restaurant-page
-npm install --save-dev webpack webpack-cli webpack-dev-server html-webpack-plugin style-loader css-loader sass-loader sass
+npm install --save-dev webpack webpack-cli webpack-merge webpack-dev-server html-webpack-plugin style-loader css-loader sass-loader sass
 ```

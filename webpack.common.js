@@ -11,10 +11,6 @@ module.exports = {
     clean: true,
   },
 
-  mode: "development",
-
-  devtool: "inline-source-map",
-
   plugins: [
     new HtmlWebpackPlugin({
       title: "Todo List: Odin Project #11",
@@ -48,13 +44,4 @@ module.exports = {
       },
     ],
   },
-
-  devServer: {
-    static: "./dist",
-  },
-
-  optimization: {
-    runtimeChunk: "single",
-  },
 };
-
