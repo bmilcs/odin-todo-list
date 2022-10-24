@@ -9,9 +9,7 @@
   --clr-neutral-200: #f0f0f0;
   --clr-neutral-100: #ffffff;
   --clr-accent-100: #1fffcf;
-  --clr-accent-200: #eeff00;
   --clr-edit-mode: #1fffce44;
-  --clr-hover: var(--clr-accent-200);
 
   --border-radius: 8px;
   --border: 3px solid var(--clr-neutral-900);
@@ -46,9 +44,10 @@ body {
 input {
   font-size: 1rem;
   padding: 0.25rem 0.5rem;
+  background: 0;
   width: 100%;
   border: none;
-  border-bottom: 2px solid var(--clr-neutral-300);
+  border-bottom: 2px solid var(--clr-neutral-900);
   background: none;
   outline: none;
 }
@@ -83,7 +82,7 @@ label {
 .sidebar {
   grid-area: sidebar;
   background: var(--clr-neutral-300);
-  padding: 1rem;
+  padding: 0.75rem;
 
   border-right: var(--border);
 
@@ -174,10 +173,6 @@ label {
   border-radius: 50%;
   max-width: 2rem;
   aspect-ratio: 1/1;
-
-  &:hover {
-    background-color: var(--clr-hover);
-  }
 }
 
 .task-container {
@@ -186,8 +181,7 @@ label {
   justify-content: flex-start;
   gap: 0.25rem;
 
-  padding: 0.25rem 0.15rem;
-  margin-block: 0.75rem;
+  padding: 0.5rem;
   border-radius: var(--border-radius);
 
   &.edit-task-mode {
@@ -207,8 +201,7 @@ label {
   }
 
   input:not(disabled) {
-    background: 0;
-    border-bottom: 2px solid var(--clr-neutral-800);
+    border-bottom: 2px solid var(--clr-neutral-900);
   }
 
   & :nth-child(3) {
