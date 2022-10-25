@@ -1,42 +1,77 @@
-import TaskList from "./task-list";
+import Project from "./project";
 
-const Storage = [];
+let Storage = [];
 
-const addList = (list) => {
-  const newList = new TaskList(list);
-  Storage.push(newList);
-  return newList;
+const isLocalStorageSupported = typeof storage !== "undefined";
+
+const saveToLocalStorage = () => {
+  if (isLocalStorageSupported) {
+    localStorage.setItem("bmTodo", JSON.stringify(Storage));
+    console.log(JSON.parse(localStorage.getItem("bmTodo")));
+  }
 };
 
-const getLists = () => {
+const addProject = (projectName) => {
+  const project = new Project(projectName);
+  Storage.push(project);
+  saveToLocalStorage();
+  return project;
+};
+
+const getAllProjects = () => {
+  if (localStorage.getItem("bmTodo") !== null)
+    if ("bmTodo" in localStorage) {
+      Storage = JSON.parse(localStorage.getItem("bmTodo"));
+    }
   return Storage;
 };
 
-const findList = (listTitle) => {
-  return Storage.find((list) => {
-    return list.name == listTitle;
+const getProjectObj = (projectName) => {
+  return Storage.find((project) => {
+    return project.name == projectName;
   });
 };
 
-const getTaskFromList = (taskDesc, listTitle) => {
-  const taskList = findList(listTitle).tasks;
-  const index = taskList.findIndex((task) => task.description === taskDesc);
-  return taskList[index];
+const getAllProjectNames = () => {
+  return Storage.map((project) => project.getName());
 };
 
-const deleteTaskFromList = (description, listTitle) => {
-  const taskList = findList(listTitle);
+const getAllTasksForProject = (projectName) => {
+  return getProjectObj(projectName).tasks;
+};
+
+const getATaskFromProject = (description, projectName) => {
+  const tasksArray = getProjectObj(projectName).tasks;
+  const index = tasksArray.findIndex(
+    (task) => task.description === description
+  );
+  return tasksArray[index];
+};
+
+const changeTaskDescription = (originalValue, newValue, projectName) => {
+  const listObj = getATaskFromProject(originalValue, projectName);
+  listObj.description = newValue;
+};
+
+const addTaskToProject = (description, projectName) => {
+  const taskList = getProjectObj(projectName);
+  taskList.addTask(description);
+  saveToLocalStorage();
+};
+
+const deleteTaskFromProject = (description, projectName) => {
+  const taskList = getProjectObj(projectName);
   taskList.deleteTask(description);
+  saveToLocalStorage();
 };
 
 const generateSampleData = () => {
   // List #1
-  const list = addList("Web Development");
+  const list = addProject("Web Development");
   list.addTask("Finish my todo list project", "11/2/2022");
   list.addTask("Complete Odin Project", "1/1/2023");
-
   // List #2
-  const list2 = addList("Home Renovation");
+  const list2 = addProject("Home Renovation");
   list2.addTask("Install living room windows", "1/1/2023");
   list2.addTask(
     "Spray foam insulation in window rough opening gaps",
@@ -49,10 +84,14 @@ const generateSampleData = () => {
 };
 
 export {
-  addList,
-  getLists,
-  findList,
-  getTaskFromList,
-  deleteTaskFromList,
-  generateSampleData as generateSampleData,
+  addProject,
+  getAllProjects,
+  getAllProjectNames,
+  getProjectObj,
+  getATaskFromProject,
+  getAllTasksForProject,
+  addTaskToProject,
+  changeTaskDescription,
+  deleteTaskFromProject,
+  generateSampleData,
 };

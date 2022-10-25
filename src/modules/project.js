@@ -5,32 +5,32 @@ import Task from "./task";
 // object role: aggregate
 //
 
-export default function TaskList(name) {
+export default function Project(name) {
   this.name = name;
   this.tasks = [];
 }
 
-TaskList.prototype.getTasks = function () {
+Project.prototype.getTasks = function () {
   return this.tasks;
 };
 
-TaskList.prototype.getLastTask = function () {
+Project.prototype.getLastTask = function () {
   return this.tasks[this.tasks.length - 1];
 };
 
-TaskList.prototype.getName = function () {
+Project.prototype.getName = function () {
   return this.name;
 };
 
-TaskList.prototype.addTask = function (task, dueDate) {
+Project.prototype.addTask = function (task, dueDate) {
   this.tasks.push(new Task(task, dueDate));
 };
 
-TaskList.prototype.deleteTask = function (description) {
+Project.prototype.deleteTask = function (description) {
   const index = this.getIndexForTask(description);
   this.tasks.splice(index, 1);
 };
 
-TaskList.prototype.getIndexForTask = function (description) {
+Project.prototype.getIndexForTask = function (description) {
   return this.tasks.findIndex((task) => task.description === description);
 };

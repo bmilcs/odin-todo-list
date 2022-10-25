@@ -141,14 +141,14 @@ label {
   );
 }
 
-.list-container {
+.project-container {
   max-width: 80ch;
   padding: 1rem;
   margin: 1rem;
   background: var(--clr-neutral-100);
 
   box-shadow: var(--box-shadow);
-  .list-title {
+  .project-title {
     margin-bottom: 0.5rem;
   }
 }

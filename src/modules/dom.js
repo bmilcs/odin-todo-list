@@ -38,14 +38,6 @@ const renderSidebar = () => {
   );
 };
 
-const prepAllProjectBtns = () => {
-  const projectsArray = getAllListsFromStorage();
-  return projectsArray.map((listObj) => {
-    const listName = listObj.getName();
-    return prepProjectBtn(listName);
-  });
-};
-
 const prepProjectBtn = (name) => {
   const button = containerize(
     makeElement("button", "nav-button"),
@@ -56,38 +48,16 @@ const prepProjectBtn = (name) => {
   return button;
 };
 
-const swapProjectEvent = (e) => {
-  // swap to project on button click
-  const projectName = e.target.textContent;
-  projectName === "View All"
-    ? renderAllProjects()
-    : renderOneProject(projectName);
-};
-
-const renderAllProjects = () => {
-  // triggered on first page load & 'view all' button click
-  clearMainContent();
-  const arrayOfListObjs = getAllListsFromStorage();
-  arrayOfListObjs.forEach((listObj) => {
-    renderTaskList(listObj);
+const prepAllProjectBtns = () => {
+  const projectNamesArray = getAllProjectNamesFromStorage();
+  return projectNamesArray.map((name) => {
+    return prepProjectBtn(name);
   });
 };
 
-const renderOneProject = (projectName) => {
-  // triggered on a single project view
-  const listObj = getProjectFromStorage(projectName);
-  clearMainContent();
-  renderTaskList(listObj);
-};
-
-const renderTaskList = (listObj) => {
-  // used by display one & all project buttons
-  // prevents clearing page on renderAllProjects
-  const elements = prepProjectView(listObj);
-  main.content.appendChild(elements);
-};
-
 const prepAddNewProject = () => {
+  const label = makeElement("label", "add-project-label", "Add Project");
+  label.htmlFor = "add-project-textbox";
   const textbox = makeElement(
     "input",
     "add-project-textbox",
@@ -97,8 +67,6 @@ const prepAddNewProject = () => {
   textbox.addEventListener("keydown", (e) => {
     if (e.key === "Enter") addProjectEvent(e);
   });
-  const label = makeElement("label", "add-project-label", "Add Project");
-  label.htmlFor = "add-project-textbox";
   const button = containerize(
     makeElement("button", "add-project-btn"),
     makeElement("img", "add-project-img", "Add Project", "", plusSignSVG)
@@ -114,9 +82,8 @@ const prepAddNewProject = () => {
 const addProjectEvent = (e) => {
   const element = e.target;
   const projectName = element.closest("div").firstChild.value;
+  const allProjectNames = getAllProjectNamesFromStorage();
   // prevent empty & duplicate names
-  const allProjects = getAllListsFromStorage();
-  const allProjectNames = allProjects.map((project) => project.name);
   if (
     projectName === "" ||
     projectName === null ||
@@ -124,24 +91,81 @@ const addProjectEvent = (e) => {
     allProjectNames.some((name) => projectName === name)
   )
     return;
-  // project doesn't eixst
+  // project doesn't exist & is valid
   addNewProjectToStorage(projectName);
   clearSidebar();
   renderSidebar();
-  // display new project in main.content
-  const newProjectObj = getProjectFromStorage(projectName);
-  renderOneProject(newProjectObj);
+  // swap to new project
+  clearMainContent();
+  renderProject(projectName);
 };
 
-const prepProjectView = (listObj) => {
-  const listName = listObj.getName();
-  const tasksArray = listObj.getTasks();
+const swapProjectEvent = (e) => {
+  const projectName = e.target.textContent;
+  clearMainContent();
+  projectName === "View All" ? renderAllProjects() : renderProject(projectName);
+};
+
+const renderAllProjects = () => {
+  const projectNamesArray = getAllProjectNamesFromStorage();
+  projectNamesArray.forEach((projectName) => {
+    renderProject(projectName);
+  });
+};
+
+const renderProject = (projectName) => {
+  const elements = prepProjectView(projectName);
+  main.content.appendChild(elements);
+};
+
+const prepProjectView = (projectName) => {
+  const tasksArray = getAllTasksFromStorage(projectName);
   return containerize(
-    "list-container",
-    makeElement("h2", "list-title", listName),
-    prepAddNewTask(listName),
+    "project-container",
+    makeElement("h2", "project-title", projectName),
+    prepAddNewTask(projectName),
     prepAllTasks(tasksArray)
   );
+};
+
+const prepAddNewTask = (projectName) => {
+  const label = makeElement("label", "add-task-label", "Add task");
+  label.htmlFor = `add-task-textbox-${projectName}`;
+  const textbox = makeElement(
+    "input",
+    "add-task-textbox",
+    "",
+    `add-task-textbox-${projectName}`
+  );
+  textbox.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") addTaskEvent(e);
+  });
+  const button = containerize(
+    makeElement("button", "add-task-btn"),
+    makeElement("img", "add-task-img", "Add Task", "", plusSignSVG)
+  );
+  button.addEventListener("click", addTaskEvent);
+  return containerize(
+    "add-task-section",
+    label,
+    containerize("add-task-textbox-container", textbox, button)
+  );
+};
+
+const addTaskEvent = (e) => {
+  const element = e.target;
+  const parentProject = getParentProjectElement(element);
+  const textbox = parentProject.querySelector("input");
+  // make sure text was entered
+  if (textbox.value === "") return;
+  // add new task to storage
+  const projectName = getParentProjectName(element);
+  addTaskToStorage(textbox.value, projectName);
+  // create task elements & append it to the page
+  const tasksArray = getProjectFromStorage(projectName);
+  const taskElement = prepTask(tasksArray.getLastTask());
+  parentProject.appendChild(taskElement);
+  textbox.value = "";
 };
 
 const prepAllTasks = (tasksArray) => {
@@ -191,65 +215,20 @@ const prepTask = (task) => {
   );
 };
 
-const prepAddNewTask = (listName) => {
-  const textbox = makeElement(
-    "input",
-    "add-task-textbox",
-    "",
-    `add-task-textbox-${listName}`
-  );
-  const label = makeElement("label", "add-task-label", "Add task");
-  label.htmlFor = `add-task-textbox-${listName}`;
-  const button = makeElement("button", "add-task-btn");
-  const image = makeElement("img", "add-task-img", "Add Task", "", plusSignSVG);
-  button.appendChild(image);
-  button.addEventListener("click", addTaskEvent);
-  textbox.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") addTaskEvent(e);
-  });
-  return containerize(
-    "add-task-section",
-    label,
-    containerize("add-task-textbox-container", textbox, button)
-  );
-};
-
-const addTaskEvent = (e) => {
-  const element = e.target;
-  const parentList = getParentListElement(element);
-  const textbox = parentList.querySelector("input");
-
-  // make sure text was entered
-  if (textbox.value === "") return;
-
-  // add new task to storage
-  const listTitle = getListTitle(element);
-  const tasksArray = getProjectFromStorage(listTitle);
-  tasksArray.addTask(description);
-
-  // create task elements & append it to the page
-  const taskElement = prepTask(tasksArray.getLastTask());
-  parentList.appendChild(taskElement);
-  textbox.value = "";
-};
-
 const toggleStatusEvent = (e) => {
   const element = e.target;
-
   // update status of the task in storage
-  const listTitle = getListTitle(element);
+  const projectName = getParentProjectName(element);
   const taskDescription = getTaskDescription(element);
-
-  const taskObj = getTaskFromStorage(taskDescription, listTitle);
+  const taskObj = getTaskFromStorage(taskDescription, projectName);
   taskObj.toggleStatus();
-
   // change icon to reflect its status
   taskObj.getStatus() === "Complete"
-    ? markTaskComplete(element)
-    : markTaskIncomplete(element);
+    ? renderTaskComplete(element)
+    : renderTaskIncomplete(element);
 };
 
-const markTaskComplete = (element) => {
+const renderTaskComplete = (element) => {
   const taskContainer = getParentTaskContainer(element);
   taskContainer.classList.add("completed");
   element.src = checkboxFilledSVG;
@@ -258,7 +237,7 @@ const markTaskComplete = (element) => {
   description.style.fontStyle = "italic";
 };
 
-const markTaskIncomplete = (element) => {
+const renderTaskIncomplete = (element) => {
   const taskContainer = getParentTaskContainer(element);
   taskContainer.classList.remove("completed");
   element.src = checkboxEmptySVG;
@@ -271,23 +250,19 @@ const editTaskDescriptionEvent = (e) => {
   const editIcon = e.target;
   const input = getTaskDescriptionElement(editIcon);
   const originalValue = input.value;
-
   input.disabled = false;
   input.focus();
-
   const taskContainer = getParentTaskContainer(editIcon);
   taskContainer.classList.add("edit-task-mode");
-
-  // pressing "enter" or clicking edit icon while in edit mode
   const submitEditedDescription = (e) => {
+    // "enter" or clicking edit icon while in edit mode
     if (e.key === "Enter" || e.target === editIcon) {
       input.disabled = true;
       taskContainer.classList.remove("edit-task-mode");
-
       const newValue = input.value;
       if (newValue !== originalValue) {
-        const listTitle = getListTitle(editIcon);
-        changeTaskDescriptionInStorage(originalValue, newValue, listTitle);
+        const projectName = getParentProjectName(editIcon);
+        changeTaskDescriptionInStorage(originalValue, newValue, projectName);
       }
       editIcon.removeEventListener("click", submitEditedDescription);
       input.removeEventListener("keydown", submitEditedDescription);
@@ -303,9 +278,9 @@ const editTaskDescriptionEvent = (e) => {
 
 const deleteTaskEvent = (e) => {
   const element = e.target;
-  const listTitle = getListTitle(element);
+  const projectName = getParentProjectName(element);
   const taskDescription = getTaskDescription(element);
-  deleteTaskFromStorage(taskDescription, listTitle);
+  deleteTaskFromStorage(taskDescription, projectName);
   const taskContainer = getParentTaskContainer(element);
   taskContainer.remove();
 };
@@ -324,18 +299,17 @@ const clearSidebar = () => clearContainer(main.sidebar);
 
 const clearMainContent = () => clearContainer(main.content);
 
-// used as a reference point for other functions
-const getParentListElement = (element) => {
-  return element.closest(".list-container");
+const getParentProjectElement = (element) => {
+  return element.closest(".project-container");
 };
 
 const getParentTaskContainer = (element) => {
   return element.closest(".task-container");
 };
 
-const getListTitle = (element) => {
-  const parentList = getParentListElement(element);
-  return parentList.firstChild.textContent;
+const getParentProjectName = (element) => {
+  const parentProject = getParentProjectElement(element);
+  return parentProject.firstChild.textContent;
 };
 
 const getTaskDescription = (element) => {
@@ -351,26 +325,37 @@ const getTaskDescriptionElement = (element) => {
 //
 
 const addNewProjectToStorage = (name) => {
-  Storage.addList(name);
+  return Storage.addProject(name);
 };
 
 const getProjectFromStorage = (name) => {
-  return Storage.findList(name);
+  return Storage.getProjectObj(name);
 };
 
-const getAllListsFromStorage = () => {
-  return Storage.getLists();
+const getAllProjectNamesFromStorage = () => {
+  return Storage.getAllProjectNames();
 };
 
-const getTaskFromStorage = (taskDescription, listTitle) => {
-  return Storage.getTaskFromList(taskDescription, listTitle);
+const getAllTasksFromStorage = (projectName) => {
+  return Storage.getAllTasksForProject(projectName);
 };
 
-const deleteTaskFromStorage = (taskDescription, listTitle) => {
-  Storage.deleteTaskFromList(taskDescription, listTitle);
+const getTaskFromStorage = (description, projectName) => {
+  return Storage.getATaskFromProject(description, projectName);
 };
 
-const changeTaskDescriptionInStorage = (originalValue, newValue, listTitle) => {
-  const listObj = getTaskFromStorage(originalValue, listTitle);
-  listObj.description = newValue;
+const addTaskToStorage = (description, projectName) => {
+  Storage.addTaskToProject(description, projectName);
+};
+
+const deleteTaskFromStorage = (description, projectName) => {
+  Storage.deleteTaskFromProject(description, projectName);
+};
+
+const changeTaskDescriptionInStorage = (
+  originalValue,
+  newValue,
+  projectName
+) => {
+  Storage.changeTaskDescription(originalValue, newValue, projectName);
 };
