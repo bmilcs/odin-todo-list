@@ -336,7 +336,7 @@ const getAllProjectNamesFromStorage = () => {
 };
 
 const getAllTasksFromStorage = (projectName) => {
-  return Storage.getAllTasksForProject(projectName);
+  return Storage.getAllTasksFromProject(projectName);
 };
 
 const getTaskFromStorage = (description, projectName) => {

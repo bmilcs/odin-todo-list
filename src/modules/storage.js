@@ -2,13 +2,13 @@ import Project from "./project";
 
 let Storage = [];
 
-const isLocalStorageSupported = typeof storage !== "undefined";
-
 const saveToLocalStorage = () => {
-  if (isLocalStorageSupported) {
-    localStorage.setItem("bmTodo", JSON.stringify(Storage));
-    console.log(JSON.parse(localStorage.getItem("bmTodo")));
-  }
+  const isLocalStorageSupported = typeof storage !== "undefined";
+  // if (isLocalStorageSupported) {
+  console.warn("Storage is supported.");
+  localStorage.setItem("bmTodo", JSON.stringify(Storage));
+  // }
+  console.log(JSON.parse(localStorage.getItem("bmTodo")));
 };
 
 const addProject = (projectName) => {
@@ -36,7 +36,7 @@ const getAllProjectNames = () => {
   return Storage.map((project) => project.getName());
 };
 
-const getAllTasksForProject = (projectName) => {
+const getAllTasksFromProject = (projectName) => {
   return getProjectObj(projectName).tasks;
 };
 
@@ -51,6 +51,7 @@ const getATaskFromProject = (description, projectName) => {
 const changeTaskDescription = (originalValue, newValue, projectName) => {
   const listObj = getATaskFromProject(originalValue, projectName);
   listObj.description = newValue;
+  saveToLocalStorage;
 };
 
 const addTaskToProject = (description, projectName) => {
@@ -66,11 +67,9 @@ const deleteTaskFromProject = (description, projectName) => {
 };
 
 const generateSampleData = () => {
-  // List #1
   const list = addProject("Web Development");
   list.addTask("Finish my todo list project", "11/2/2022");
   list.addTask("Complete Odin Project", "1/1/2023");
-  // List #2
   const list2 = addProject("Home Renovation");
   list2.addTask("Install living room windows", "1/1/2023");
   list2.addTask(
@@ -85,12 +84,12 @@ const generateSampleData = () => {
 
 export {
   addProject,
+  addTaskToProject,
+  getProjectObj,
   getAllProjects,
   getAllProjectNames,
-  getProjectObj,
   getATaskFromProject,
-  getAllTasksForProject,
-  addTaskToProject,
+  getAllTasksFromProject,
   changeTaskDescription,
   deleteTaskFromProject,
   generateSampleData,
