@@ -173,7 +173,6 @@ const prepAllTasks = (tasksArray) => {
 };
 
 const prepTask = (task) => {
-  const container = makeElement("div", "task-container");
   const checkbox = makeElement(
     "img",
     "task-status unchecked",
@@ -206,7 +205,7 @@ const prepTask = (task) => {
   deleteIcon.addEventListener("click", deleteTaskEvent);
   checkbox.addEventListener("click", toggleStatusEvent);
   return containerize(
-    container,
+    "task-container",
     checkbox,
     descriptionInput,
     dueDate,
