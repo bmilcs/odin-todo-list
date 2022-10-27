@@ -1,7 +1,7 @@
 import Project from "./project";
 import Task from "./task";
 
-let Storage = [];
+const Storage = [];
 
 const saveToLocalStorage = () => {
   localStorage.setItem("bmilcs-todolist", JSON.stringify(Storage));
@@ -77,14 +77,21 @@ const changeTaskDueDate = (date, description, projectName) => {
 const loadProjects = () => {
   if (localStorage.getItem("bmilcs-todolist") !== null) {
     const importedData = JSON.parse(localStorage.getItem("bmilcs-todolist"));
-    Storage = importedData.map((project) => {
-      const newTaskList = project["tasks"].map((task) => {
+    const reassembledProjectObjects = importedData.map((project) => {
+      // localStorage strips away prototype methods & constructor function
+      // convert Storage[] > Project.tasks[] > task{} to Task objects
+      // in order to regain its prototype methods
+      const tasksWithPrototype = project["tasks"].map((task) => {
         return new Task(task.description, task.dueDate, task.status);
       });
-      const newProject = Object.assign(new Project(project.name));
-      newProject.tasks = newTaskList;
-      return newProject;
+      // convert Storage[] > project{} to Project objects to regain its
+      // prototype methods & constructor function
+      const projectWithPrototype = Object.assign(new Project(project.name));
+      // reassmble the final data structure:
+      projectWithPrototype.tasks = tasksWithPrototype;
+      return projectWithPrototype;
     });
+    reassembledProjectObjects.forEach((project) => Storage.push(project));
   } else {
     generateSampleData();
   }
