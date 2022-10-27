@@ -9,7 +9,6 @@ Welcome to Bryan Miller's Todo List Project, the [eleventh assignment](https://w
   - `production` & `development` configs
 - ES6 Modules
 - SASS
-- VIM: Neovim (First Project)
 
 ## Summary
 
@@ -28,7 +27,7 @@ In progress...
 
 ```sh
 # clone repo
-git clone https://github.com/bmilcs/odin-restaurant-page.git
+git clone https://github.com/bmilcs/odin-todo-list.git
 
 # install dev dependencies
 cd odin-restaurant-page
