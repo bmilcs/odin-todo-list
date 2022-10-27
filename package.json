@@ -35,5 +35,10 @@
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.11.1",
     "webpack-merge": "^5.8.0"
+  },
+  "dependencies": {
+    "date-fns": "^2.29.3",
+    "i": "^0.3.7",
+    "npm": "^8.19.2"
   }
 }
