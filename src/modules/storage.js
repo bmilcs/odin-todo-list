@@ -1,14 +1,10 @@
 import Project from "./project";
+import Task from "./task";
 
 let Storage = [];
 
 const saveToLocalStorage = () => {
-  const isLocalStorageSupported = typeof storage !== "undefined";
-  // if (isLocalStorageSupported) {
-  console.warn("Storage is supported.");
-  localStorage.setItem("bmTodo", JSON.stringify(Storage));
-  // }
-  console.log(JSON.parse(localStorage.getItem("bmTodo")));
+  localStorage.setItem("bmilcs-todolist", JSON.stringify(Storage));
 };
 
 const addProject = (projectName) => {
@@ -16,14 +12,6 @@ const addProject = (projectName) => {
   Storage.push(project);
   saveToLocalStorage();
   return project;
-};
-
-const getAllProjects = () => {
-  if (localStorage.getItem("bmTodo") !== null)
-    if ("bmTodo" in localStorage) {
-      Storage = JSON.parse(localStorage.getItem("bmTodo"));
-    }
-  return Storage;
 };
 
 const getProjectObj = (projectName) => {
@@ -66,31 +54,69 @@ const deleteTaskFromProject = (description, projectName) => {
   saveToLocalStorage();
 };
 
+const changeTaskDueDate = (date, description, projectName) => {
+  const task = getATaskFromProject(description, projectName);
+  task.setDate(date);
+  saveToLocalStorage();
+};
+
+// data structure:
+// Storage = [
+//  Project {
+//    name: Project Name
+//    tasks: [
+//      Task {
+//        description: Task description
+//        dueDate: ...
+//        getDescription()
+//      } task obj
+//    ] tasks array
+//  } project obj
+// ] storage array
+
+const loadProjects = () => {
+  if (localStorage.getItem("bmilcs-todolist") !== null) {
+    const importedData = JSON.parse(localStorage.getItem("bmilcs-todolist"));
+    Storage = importedData.map((project) => {
+      const newTaskList = project["tasks"].map((task) => {
+        return new Task(task.description, task.dueDate, task.status);
+      });
+      const newProject = Object.assign(new Project(project.name));
+      newProject.tasks = newTaskList;
+      return newProject;
+    });
+  } else {
+    generateSampleData();
+  }
+};
+
 const generateSampleData = () => {
   const list = addProject("Web Development");
-  list.addTask("Finish my todo list project", "11/2/2022");
-  list.addTask("Complete Odin Project", "1/1/2023");
+  list.addTask("Finish my todo list project", "2022-11-01");
+  list.addTask("Complete Odin Project", "2023-01-01");
   const list2 = addProject("Home Renovation");
-  list2.addTask("Install living room windows", "1/1/2023");
+  list2.addTask("Install living room windows", "2023-01-01");
   list2.addTask(
     "Spray foam insulation in window rough opening gaps",
-    "1/1/2023"
+    "2023-01-01"
   );
-  list2.addTask("Cut & install window casing", "1/1/2023");
-  list2.addTask("Prime window trim", "1/1/2023");
-  list2.addTask("Caulk interior & exterior", "1/1/2023");
-  list2.addTask("Paint window", "1/1/2023");
+  list2.addTask("Cut & install window casing", "2023-01-01");
+  list2.addTask("Prime window trim", "2023-01-01");
+  list2.addTask("Caulk interior & exterior", "2023-01-01");
+  list2.addTask("Paint window", "2023-01-01");
+  saveToLocalStorage();
 };
 
 export {
   addProject,
   addTaskToProject,
   getProjectObj,
-  getAllProjects,
   getAllProjectNames,
   getATaskFromProject,
   getAllTasksFromProject,
+  loadProjects,
   changeTaskDescription,
   deleteTaskFromProject,
+  changeTaskDueDate,
   generateSampleData,
 };

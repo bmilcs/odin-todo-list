@@ -17,7 +17,7 @@ import arrowSVG from "../assets/arrow.svg";
 //
 
 export const renderPage = () => {
-  Storage.generateSampleData();
+  loadProjectsFromStorage();
   renderLayout();
   renderSidebar();
   renderAllProjects();
@@ -186,7 +186,9 @@ const prepTask = (task) => {
     task.getDescription()
   );
   descriptionInput.disabled = true;
-  const dueDate = makeElement("p", "task-date", task.getDate());
+  const dueDate = makeElement("input", "task-date", task.getDate());
+  dueDate.setAttribute("type", "date");
+  dueDate.addEventListener("change", saveDateEvent);
   const deleteIcon = makeElement(
     "img",
     "delete-task",
@@ -212,6 +214,14 @@ const prepTask = (task) => {
     editIcon,
     deleteIcon
   );
+};
+
+const saveDateEvent = (e) => {
+  const element = e.target;
+  const dueDate = e.target.value;
+  const projectName = getParentProjectName(element);
+  const taskDescription = getTaskDescription(element);
+  saveDateForTaskInStorage(dueDate, taskDescription, projectName);
 };
 
 const toggleStatusEvent = (e) => {
@@ -357,4 +367,12 @@ const changeTaskDescriptionInStorage = (
   projectName
 ) => {
   Storage.changeTaskDescription(originalValue, newValue, projectName);
+};
+
+const saveDateForTaskInStorage = (dueDate, description, projectName) => {
+  Storage.changeTaskDueDate(dueDate, description, projectName);
+};
+
+const loadProjectsFromStorage = () => {
+  Storage.loadProjects();
 };

@@ -3,10 +3,10 @@
 // object role: information holder
 //
 
-export default function Task(description, dueDate = "No Date") {
+export default function Task(description, dueDate = "No Date", status = 0) {
   this.description = description;
   this.dueDate = dueDate;
-  this.status = 0;
+  this.status = status;
 }
 
 Task.prototype.getDescription = function () {
