@@ -24,11 +24,11 @@ export default function containerize(nodeOrClassesForNewDiv, ...childNodes) {
   // callback function: error catching while appending children to container
   const addToContainer = (child) => {
     child.nodeType
-      ? container.appendChild(x)
+      ? container.appendChild(child)
       : console.warn(`${x} is not an element!`);
   };
 
-  // loop through all arguments: 
+  // loop through all arguments:
   //  if node, append it to container.
   //  if array, loop & append all to container
   const children = Array.from(childNodes);
