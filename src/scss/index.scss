@@ -92,6 +92,10 @@ label {
     padding: 1rem;
   }
 
+  h2:nth-of-type(2) {
+    margin-top: 1.5rem;
+  }
+
   // all children
   > * {
     text-align: left;
@@ -100,6 +104,7 @@ label {
   }
 
   .add-new-project-container {
+    margin-top: 1rem;
     background: none;
 
     .add-project-textbox-container {
