@@ -21,14 +21,16 @@ export default function containerize(nodeOrClassesForNewDiv, ...childNodes) {
       .forEach((cls) => container.classList.add(cls));
   }
 
-  const addToContainer = (x) => {
-    x.nodeType
+  // callback function: error catching while appending children to container
+  const addToContainer = (child) => {
+    child.nodeType
       ? container.appendChild(x)
       : console.warn(`${x} is not an element!`);
   };
 
-  // loop through all arguments: if node, append it to container.
-  // if array, loop & append all to container
+  // loop through all arguments: 
+  //  if node, append it to container.
+  //  if array, loop & append all to container
   const children = Array.from(childNodes);
   children.forEach((child) => {
     child.constructor === Array
