@@ -13,7 +13,7 @@ export default function makeElement(
   // add classes, separated by spaces
   if (classes) classes.split(" ").forEach((cls) => element.classList.add(cls));
 
-  // add alt text if img OR textContent for everything else
+  // add alt text if img, value if input, textContent for all other element types
   if (type === "img") element.alt = textContentOrAltOrValue;
   else if (type === "input") element.value = textContentOrAltOrValue;
   else element.textContent = textContentOrAltOrValue;
