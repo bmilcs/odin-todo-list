@@ -31,6 +31,10 @@ const renderLayout = () => {
 const renderSidebar = () => {
   containerize(
     main.sidebar,
+    makeElement("h2", "sidebar-title", "By Date"),
+    prepProjectBtn("Today"),
+    prepProjectBtn("This Week"),
+    prepProjectBtn("This Month"),
     makeElement("h2", "sidebar-title", "Projects"),
     prepProjectBtn("View All"),
     prepAllProjectBtns(),
@@ -46,6 +50,19 @@ const prepProjectBtn = (name) => {
   );
   button.addEventListener("click", swapProjectEvent);
   return button;
+};
+
+const swapProjectEvent = (e) => {
+  const projectName = e.target.textContent;
+  clearMainContent();
+  if (projectName === "View All") renderAllProjects();
+  else if (
+    projectName === "Today" ||
+    projectName === "This Week" ||
+    projectName === "This Month"
+  )
+    renderTasksFilteredByDate(projectName);
+  else renderProject(projectName);
 };
 
 const prepAllProjectBtns = () => {
@@ -100,10 +117,14 @@ const addProjectEvent = (e) => {
   renderProject(projectName);
 };
 
-const swapProjectEvent = (e) => {
-  const projectName = e.target.textContent;
-  clearMainContent();
-  projectName === "View All" ? renderAllProjects() : renderProject(projectName);
+const renderTasksFilteredByDate = (timeframeDescription) => {
+  const filteredData = Storage.getTasksFilteredByDate(timeframeDescription);
+  const filteredProjectElements = filteredData.map((project) => {
+    return prepDateFilteredProjects(project);
+  });
+  filteredProjectElements.forEach((project) =>
+    main.content.appendChild(project)
+  );
 };
 
 const renderAllProjects = () => {
@@ -116,6 +137,17 @@ const renderAllProjects = () => {
 const renderProject = (projectName) => {
   const elements = prepProjectView(projectName);
   main.content.appendChild(elements);
+};
+
+const prepDateFilteredProjects = (project) => {
+  const projectName = project.name;
+  const tasksArray = project.tasks;
+  return containerize(
+    "project-container",
+    makeElement("h2", "project-title", projectName),
+    prepAddNewTask(projectName),
+    prepAllTasks(tasksArray)
+  );
 };
 
 const prepProjectView = (projectName) => {

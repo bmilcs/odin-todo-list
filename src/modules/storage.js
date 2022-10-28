@@ -1,7 +1,23 @@
+import { endOfMonth, endOfWeek, isBefore, addDays, parseISO } from "date-fns";
 import Project from "./project";
 import Task from "./task";
 
 const Storage = [];
+
+// DATA STRUCTURE:
+//
+// Storage = [
+//  Project {
+//    name: Project Name
+//    tasks: [
+//      Task {
+//        description: Task description
+//        dueDate: ...
+//        getDescription()
+//      }
+//    ]
+//  }
+// ]
 
 const saveToLocalStorage = () => {
   localStorage.setItem("bmilcs-todolist", JSON.stringify(Storage));
@@ -36,6 +52,42 @@ const getATaskFromProject = (description, projectName) => {
   return tasksArray[index];
 };
 
+const getTasksFilteredByDate = (timeframeDescription) => {
+  let dateRestriction;
+  const todaysDate = new Date();
+
+  // determine cut off date
+  if (timeframeDescription === "Today") dateRestriction = todaysDate;
+  else if (timeframeDescription === "This Week") {
+    dateRestriction = addDays(endOfWeek(todaysDate), 1);
+  } else if (timeframeDescription === "This Month")
+    dateRestriction = endOfMonth(todaysDate);
+
+  // recreate the same data structure, filtering tasks by date
+  // create a new array: filteredStorage[] > filteredProject{}.tasks[] > filteredTasks{}
+  const filteredStorage = Storage.reduce((filteredStorage, project) => {
+    // tasks []: contains Task objects
+    const allTasks = project.tasks;
+    // remove any tasks that aren't before the date restriction
+    const filteredTasks = allTasks.filter((task) => {
+      const parsedDuedate = parseISO(task.dueDate);
+      return isBefore(parsedDuedate, dateRestriction);
+    });
+    // if no tasks remain, return without adding the project to the new array
+    if (filteredTasks.length === 0) {
+      return filteredStorage;
+    }
+    // filtered tasks exist: recreate the Project w/ filtered tasks
+    const filteredProject = {};
+    filteredProject.name = project.getName();
+    filteredProject.tasks = [...filteredTasks];
+    // add the project to the new filteredStorage
+    filteredStorage.push(filteredProject);
+    return filteredStorage;
+  }, []);
+  return filteredStorage;
+};
+
 const changeTaskDescription = (originalValue, newValue, projectName) => {
   const listObj = getATaskFromProject(originalValue, projectName);
   listObj.description = newValue;
@@ -59,20 +111,6 @@ const changeTaskDueDate = (date, description, projectName) => {
   task.setDate(date);
   saveToLocalStorage();
 };
-
-// data structure:
-// Storage = [
-//  Project {
-//    name: Project Name
-//    tasks: [
-//      Task {
-//        description: Task description
-//        dueDate: ...
-//        getDescription()
-//      } task obj
-//    ] tasks array
-//  } project obj
-// ] storage array
 
 const loadProjects = () => {
   if (localStorage.getItem("bmilcs-todolist") !== null) {
@@ -101,6 +139,9 @@ const generateSampleData = () => {
   const list = addProject("Web Development");
   list.addTask("Finish my todo list project", "2022-11-01");
   list.addTask("Complete Odin Project", "2023-01-01");
+  list.addTask("Lorem ipsum2", "2022-10-29");
+  list.addTask("Lorem ipsum", "2022-10-30");
+
   const list2 = addProject("Home Renovation");
   list2.addTask("Install living room windows", "2023-01-01");
   list2.addTask(
@@ -126,4 +167,5 @@ export {
   deleteTaskFromProject,
   changeTaskDueDate,
   generateSampleData,
+  getTasksFilteredByDate,
 };
