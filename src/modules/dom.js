@@ -286,7 +286,7 @@ const renderTaskIncomplete = (element) => {
 
 // toggles between edit & submit modes
 const editTaskDescriptionEvent = (e) => {
-  // edit mode
+  // edit mode: editIcon clicked
   const editIcon = e.target;
   const input = getTaskDescriptionElement(editIcon);
   const originalValue = input.value;
@@ -296,7 +296,6 @@ const editTaskDescriptionEvent = (e) => {
   taskContainer.classList.add("edit-task-mode");
   // submit mode callback (explained at bottom of the parent scope)
   const submitEditedDescription = (e) => {
-    // keyboard "enter" or clicking edit icon while in edit mode
     if (e.key === "Enter" || e.key === "Escape" || e.target === editIcon) {
       // edit mode is over:
       input.disabled = true;
