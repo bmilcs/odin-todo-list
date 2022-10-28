@@ -82,13 +82,13 @@ const prepAddNewProject = () => {
     "add-project-textbox"
   );
   textbox.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") addProjectEvent(e);
+    if (e.key === "Enter") addNewProjectEvent(e);
   });
   const button = containerize(
     makeElement("button", "add-project-btn"),
     makeElement("img", "add-project-img", "Add Project", "", plusSignSVG)
   );
-  button.addEventListener("click", addProjectEvent);
+  button.addEventListener("click", addNewProjectEvent);
   return containerize(
     "add-new-project-container",
     label,
@@ -96,7 +96,7 @@ const prepAddNewProject = () => {
   );
 };
 
-const addProjectEvent = (e) => {
+const addNewProjectEvent = (e) => {
   const element = e.target;
   const newProjectName = element.closest("div").firstChild.value;
   const allProjectNames = Storage.getAllProjectNames();
@@ -135,7 +135,7 @@ const renderAllProjects = () => {
 };
 
 const renderProject = (projectName) => {
-  const elements = prepProjectView(projectName);
+  const elements = prepFullProjectView(projectName);
   main.content.appendChild(elements);
 };
 
@@ -150,7 +150,7 @@ const prepDateFilteredProjects = (project) => {
   );
 };
 
-const prepProjectView = (projectName) => {
+const prepFullProjectView = (projectName) => {
   const tasksArray = Storage.getAllTasksFromProject(projectName);
   return containerize(
     "project-container",
@@ -251,18 +251,16 @@ const changeDateEvent = (e) => {
   const element = e.target;
   const dueDate = e.target.value;
   const projectName = getParentProjectName(element);
-  const taskDescription = getTaskDescription(element);
+  const taskDescription = getTaskDescriptionValue(element);
   Storage.changeTaskDueDate(dueDate, taskDescription, projectName);
 };
 
 const toggleStatusEvent = (e) => {
   const element = e.target;
-  // update status of the task in storage
   const projectName = getParentProjectName(element);
-  const taskDescription = getTaskDescription(element);
+  const taskDescription = getTaskDescriptionValue(element);
   const taskObj = Storage.getATaskFromProject(taskDescription, projectName);
   taskObj.toggleStatus();
-  // change icon & formatting to reflect its status
   taskObj.getStatus() === "Complete"
     ? renderTaskComplete(element)
     : renderTaskIncomplete(element);
@@ -286,7 +284,9 @@ const renderTaskIncomplete = (element) => {
   description.style.fontStyle = "normal";
 };
 
+// toggles between edit & submit modes
 const editTaskDescriptionEvent = (e) => {
+  // edit mode
   const editIcon = e.target;
   const input = getTaskDescriptionElement(editIcon);
   const originalValue = input.value;
@@ -294,15 +294,23 @@ const editTaskDescriptionEvent = (e) => {
   input.focus();
   const taskContainer = getParentTaskContainer(editIcon);
   taskContainer.classList.add("edit-task-mode");
+  // submit mode callback (explained at bottom of the parent scope)
   const submitEditedDescription = (e) => {
-    // "enter" or clicking edit icon while in edit mode
-    if (e.key === "Enter" || e.target === editIcon) {
+    // keyboard "enter" or clicking edit icon while in edit mode
+    if (e.key === "Enter" || e.key === "Escape" || e.target === editIcon) {
+      // edit mode is over:
       input.disabled = true;
       taskContainer.classList.remove("edit-task-mode");
-      const newValue = input.value;
-      if (newValue !== originalValue) {
-        const projectName = getParentProjectName(editIcon);
-        Storage.changeTaskDescription(originalValue, newValue, projectName);
+      // escape: restore original value only
+      if (e.key === "Escape") {
+        input.value = originalValue;
+      } else {
+        // enter/editIcon: if change was made, update storage
+        const newValue = input.value;
+        if (newValue !== originalValue) {
+          const projectName = getParentProjectName(editIcon);
+          Storage.changeTaskDescription(originalValue, newValue, projectName);
+        }
       }
       editIcon.removeEventListener("click", submitEditedDescription);
       input.removeEventListener("keydown", submitEditedDescription);
@@ -311,6 +319,9 @@ const editTaskDescriptionEvent = (e) => {
       });
     }
   };
+  // after clicking editIcon, exit "edit mode"
+  // and listen for submission of the edits:
+  // clicking editIcon again, enter or escape on keyboard
   editIcon.removeEventListener("click", editTaskDescriptionEvent);
   editIcon.addEventListener("click", submitEditedDescription);
   input.addEventListener("keydown", submitEditedDescription);
@@ -319,7 +330,7 @@ const editTaskDescriptionEvent = (e) => {
 const deleteTaskEvent = (e) => {
   const element = e.target;
   const projectName = getParentProjectName(element);
-  const taskDescription = getTaskDescription(element);
+  const taskDescription = getTaskDescriptionValue(element);
   Storage.deleteTaskFromProject(taskDescription, projectName);
   const taskContainer = getParentTaskContainer(element);
   taskContainer.remove();
@@ -352,7 +363,7 @@ const getParentProjectName = (element) => {
   return parentProject.firstChild.textContent;
 };
 
-const getTaskDescription = (element) => {
+const getTaskDescriptionValue = (element) => {
   return element.parentElement.children.item(1).value;
 };
 
