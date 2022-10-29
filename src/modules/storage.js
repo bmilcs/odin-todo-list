@@ -44,6 +44,16 @@ const getAllTasksFromProject = (projectName) => {
   return getProjectObj(projectName).tasks;
 };
 
+const isProjectEmpty = (projectName) => {
+  return getAllTasksFromProject(projectName).length === 0 ? true : false;
+};
+
+const deleteProject = (projectName) => {
+  const index = Storage.findIndex((project) => project.name === projectName);
+  Storage.splice(index, 1);
+  saveToLocalStorage();
+};
+
 const getATaskFromProject = (description, projectName) => {
   const tasksArray = getProjectObj(projectName).tasks;
   const index = tasksArray.findIndex(
@@ -168,4 +178,6 @@ export {
   changeTaskDueDate,
   generateSampleData,
   getTasksFilteredByDate,
+  isProjectEmpty,
+  deleteProject,
 };

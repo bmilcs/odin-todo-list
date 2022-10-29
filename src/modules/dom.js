@@ -333,6 +333,16 @@ const deleteTaskEvent = (e) => {
   Storage.deleteTaskFromProject(taskDescription, projectName);
   const taskContainer = getParentTaskContainer(element);
   taskContainer.remove();
+  deleteProjectIfEmpty(projectName);
+};
+
+const deleteProjectIfEmpty = (projectName) => {
+  if (!Storage.isProjectEmpty(projectName)) return;
+  Storage.deleteProject(projectName);
+  clearMainContent();
+  clearSidebar();
+  renderSidebar();
+  renderAllProjects();
 };
 
 //
