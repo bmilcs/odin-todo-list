@@ -91,10 +91,9 @@ const getTasksFilteredByDate = (timeframeDescription) => {
     const allTasks = project.tasks;
     // remove any tasks that aren't before the date restriction
     const filteredTasks = allTasks.filter((task) => {
-      const parsedDuedate = parseISO(task.dueDate);
-      const overDue = !isAfter(parsedDuedate, subDays(todaysDate, 1));
-      const beforeDateRestriction = isBefore(parsedDuedate, dateRestriction);
-      if (overDue) console.log(`${task.description} is overdue`);
+      const parsedDueDate = parseISO(task.dueDate);
+      const overDue = !isAfter(parsedDueDate, subDays(todaysDate, 1));
+      const beforeDateRestriction = isBefore(parsedDueDate, dateRestriction);
       return timeframeDescription === "Overdue"
         ? overDue
         : !overDue && beforeDateRestriction;
