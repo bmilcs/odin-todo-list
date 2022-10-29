@@ -164,9 +164,6 @@ const generateSampleData = () => {
   const list = addProject("Web Development");
   list.addTask("Finish my todo list project", "2022-11-01");
   list.addTask("Complete Odin Project", "2023-01-01");
-  list.addTask("Lorem ipsum2", "2022-10-29");
-  list.addTask("Lorem ipsum", "2022-10-30");
-
   const list2 = addProject("Home Renovation");
   list2.addTask("Install living room windows", "2023-01-01");
   list2.addTask(
