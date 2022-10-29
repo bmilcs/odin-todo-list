@@ -12,10 +12,6 @@ import checkboxEmptySVG from "../assets/unchecked.svg";
 import editSVG from "../assets/edit.svg";
 import arrowSVG from "../assets/arrow.svg";
 
-//
-// creating & rendering elements
-//
-
 export const renderPage = () => {
   Storage.loadProjects();
   renderLayout();

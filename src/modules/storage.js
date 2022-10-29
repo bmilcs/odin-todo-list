@@ -85,7 +85,7 @@ const getTasksFilteredByDate = (timeframeDescription) => {
   }
   // recreate the same data structure, filtering tasks by date
   // create a new array: filteredStorage[] > filteredProject{}.tasks[] > filteredTasks{}
-  const filteredStorage = Storage.reduce((filteredStorage, project) => {
+  const filteredStorage = Storage.reduce((filteredData, project) => {
     // tasks []: contains Task objects
     const allTasks = project.tasks;
     // remove any tasks that aren't before the date restriction
@@ -99,15 +99,15 @@ const getTasksFilteredByDate = (timeframeDescription) => {
     });
     // if no tasks remain, return without adding the project to the new array
     if (filteredTasks.length === 0) {
-      return filteredStorage;
+      return filteredData;
     }
     // filtered tasks exist: recreate the Project w/ filtered tasks
     const filteredProject = {};
     filteredProject.name = project.getName();
     filteredProject.tasks = [...filteredTasks];
     // add the project to the new filteredStorage
-    filteredStorage.push(filteredProject);
-    return filteredStorage;
+    filteredData.push(filteredProject);
+    return filteredData;
   }, []);
   return filteredStorage;
 };
@@ -152,7 +152,7 @@ const changeTaskDueDate = (date, description, projectName) => {
 const loadProjects = () => {
   if (localStorage.getItem("bmilcs-todolist") !== null) {
     const importedData = JSON.parse(localStorage.getItem("bmilcs-todolist"));
-    const reassembledProjectObjects = importedData.map((project) => {
+    const reassembledArrayofProjectObjects = importedData.map((project) => {
       // localStorage strips away prototype/methods/constructors
       // convert Storage[] > Project{}.tasks[] > task{} to new Task objects
       const tasksWithPrototype = project["tasks"].map((task) => {
@@ -164,7 +164,9 @@ const loadProjects = () => {
       projectWithPrototype.tasks = tasksWithPrototype;
       return projectWithPrototype;
     });
-    reassembledProjectObjects.forEach((project) => Storage.push(project));
+    reassembledArrayofProjectObjects.forEach((project) =>
+      Storage.push(project)
+    );
   } else {
     generateSampleData();
   }
