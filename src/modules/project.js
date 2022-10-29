@@ -14,10 +14,6 @@ Project.prototype.getTasks = function () {
   return this.tasks;
 };
 
-Project.prototype.getLastTask = function () {
-  return this.tasks[this.tasks.length - 1];
-};
-
 Project.prototype.getName = function () {
   return this.name;
 };

@@ -210,6 +210,11 @@ label {
     color: var(--clr-neutral-900);
   }
 
+  input.completed {
+    text-decoration: line-through;
+    font-style: italic;
+  }
+
   input:disabled {
     border: 0;
   }

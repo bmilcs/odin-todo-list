@@ -195,8 +195,8 @@ const addTaskEvent = (e) => {
   const projectName = getParentProjectName(element);
   Storage.addTaskToProject(textbox.value, projectName);
   // create task elements & append it to the page
-  const tasksArray = Storage.getProjectObj(projectName);
-  const taskElement = prepTask(tasksArray.getLastTask());
+  const lastTaskObj = Storage.getLastTaskFromProject(projectName);
+  const taskElement = prepTask(lastTaskObj);
   parentProject.appendChild(taskElement);
   textbox.value = "";
 };
@@ -206,16 +206,26 @@ const prepAllTasks = (tasksArray) => {
 };
 
 const prepTask = (taskObj) => {
-  const checkbox = makeElement(
-    "img",
-    "task-status unchecked",
-    "",
-    "",
-    checkboxEmptySVG
-  );
+  let checkbox, descriptionInputClasses, containerClasses;
+  if (taskObj.getStatus() === "Complete") {
+    containerClasses = "task-container completed";
+    descriptionInputClasses = "task-description-input completed";
+    checkbox = makeElement("img", "task-status", "", "", checkboxFilledSVG);
+  } else {
+    containerClasses = "task-container";
+    descriptionInputClasses = "task-description-input";
+    checkbox = makeElement(
+      "img",
+      "task-status unchecked",
+      "",
+      "",
+      checkboxEmptySVG
+    );
+  }
+  const container = makeElement("div", containerClasses);
   const descriptionInput = makeElement(
     "input",
-    "task-description-input",
+    descriptionInputClasses,
     taskObj.getDescription()
   );
   descriptionInput.disabled = true;
@@ -240,7 +250,7 @@ const prepTask = (taskObj) => {
   deleteIcon.addEventListener("click", deleteTaskEvent);
   checkbox.addEventListener("click", toggleStatusEvent);
   return containerize(
-    "task-container",
+    container,
     checkbox,
     descriptionInput,
     dueDate,
@@ -261,9 +271,8 @@ const toggleStatusEvent = (e) => {
   const element = e.target;
   const projectName = getParentProjectName(element);
   const taskDescription = getTaskDescriptionValue(element);
-  const taskObj = Storage.getATaskFromProject(taskDescription, projectName);
-  taskObj.toggleStatus();
-  taskObj.getStatus() === "Complete"
+  Storage.toggleTaskStatus(taskDescription, projectName);
+  Storage.getTaskStatus(taskDescription, projectName) === "Complete"
     ? renderTaskComplete(element)
     : renderTaskIncomplete(element);
 };
@@ -273,8 +282,7 @@ const renderTaskComplete = (element) => {
   taskContainer.classList.add("completed");
   element.src = checkboxFilledSVG;
   const description = getTaskDescriptionElement(element);
-  description.style.textDecoration = "line-through";
-  description.style.fontStyle = "italic";
+  description.classList.add("completed");
 };
 
 const renderTaskIncomplete = (element) => {
@@ -282,8 +290,7 @@ const renderTaskIncomplete = (element) => {
   taskContainer.classList.remove("completed");
   element.src = checkboxEmptySVG;
   const description = getTaskDescriptionElement(element);
-  description.style.textDecoration = "none";
-  description.style.fontStyle = "normal";
+  description.classList.remove("completed");
 };
 
 // toggles between edit & submit modes

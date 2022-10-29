@@ -14,18 +14,14 @@ const Storage = [];
 
 // DATA STRUCTURE:
 //
-// Storage = [
-//  Project {
-//    name: Project Name
-//    tasks: [
-//      Task {
-//        description: Task description
-//        dueDate: ...
-//        getDescription()
-//      }
-//    ]
-//  }
-// ]
+// Storage = []
+//   Project {}
+//     name: Project Name
+//     tasks: [
+//       Task {
+//         description: Task description
+//         dueDate: ...
+//         getDescription()
 
 const saveToLocalStorage = () => {
   localStorage.setItem("bmilcs-todolist", JSON.stringify(Storage));
@@ -52,6 +48,19 @@ const getAllTasksFromProject = (projectName) => {
   return getProjectObj(projectName).tasks;
 };
 
+const getATaskFromProject = (description, projectName) => {
+  const tasksArray = getAllTasksFromProject(projectName);
+  const index = tasksArray.findIndex(
+    (task) => task.description === description
+  );
+  return tasksArray[index];
+};
+
+const getLastTaskFromProject = (projectName) => {
+  const allTasks = getAllTasksFromProject(projectName);
+  return allTasks[allTasks.length - 1];
+};
+
 const isProjectEmpty = (projectName) => {
   return getAllTasksFromProject(projectName).length === 0 ? true : false;
 };
@@ -62,18 +71,9 @@ const deleteProject = (projectName) => {
   saveToLocalStorage();
 };
 
-const getATaskFromProject = (description, projectName) => {
-  const tasksArray = getProjectObj(projectName).tasks;
-  const index = tasksArray.findIndex(
-    (task) => task.description === description
-  );
-  return tasksArray[index];
-};
-
 const getTasksFilteredByDate = (timeframeDescription) => {
   let dateRestriction;
   const todaysDate = new Date();
-
   // determine cut off date
   if (timeframeDescription === "Today") dateRestriction = todaysDate;
   else if (timeframeDescription === "This Week") {
@@ -83,7 +83,6 @@ const getTasksFilteredByDate = (timeframeDescription) => {
   else if (timeframeDescription === "Overdue") {
     dateRestriction = todaysDate;
   }
-
   // recreate the same data structure, filtering tasks by date
   // create a new array: filteredStorage[] > filteredProject{}.tasks[] > filteredTasks{}
   const filteredStorage = Storage.reduce((filteredStorage, project) => {
@@ -114,9 +113,22 @@ const getTasksFilteredByDate = (timeframeDescription) => {
 };
 
 const changeTaskDescription = (originalValue, newValue, projectName) => {
-  const listObj = getATaskFromProject(originalValue, projectName);
-  listObj.description = newValue;
+  const taskObj = getATaskFromProject(originalValue, projectName);
+  taskObj.description = newValue;
   saveToLocalStorage;
+};
+
+const toggleTaskStatus = (taskDescription, projectName) => {
+  const taskObj = getATaskFromProject(taskDescription, projectName);
+  console.log(taskObj);
+  console.log(getATaskFromProject(taskDescription, projectName));
+  taskObj.toggleStatus();
+  saveToLocalStorage();
+};
+
+const getTaskStatus = (taskDescription, projectName) => {
+  const taskObj = getATaskFromProject(taskDescription, projectName);
+  return taskObj.getStatus();
 };
 
 const addTaskToProject = (description, projectName) => {
@@ -141,14 +153,12 @@ const loadProjects = () => {
   if (localStorage.getItem("bmilcs-todolist") !== null) {
     const importedData = JSON.parse(localStorage.getItem("bmilcs-todolist"));
     const reassembledProjectObjects = importedData.map((project) => {
-      // localStorage strips away prototype methods & constructor function
-      // convert Storage[] > Project.tasks[] > task{} to Task objects
-      // in order to regain its prototype methods
+      // localStorage strips away prototype/methods/constructors
+      // convert Storage[] > Project{}.tasks[] > task{} to new Task objects
       const tasksWithPrototype = project["tasks"].map((task) => {
         return new Task(task.description, task.dueDate, task.status);
       });
-      // convert Storage[] > project{} to Project objects to regain its
-      // prototype methods & constructor function
+      // convert Storage[] > project{} to Project objects
       const projectWithPrototype = Object.assign(new Project(project.name));
       // reassmble the final data structure:
       projectWithPrototype.tasks = tasksWithPrototype;
@@ -184,6 +194,9 @@ export {
   getAllProjectNames,
   getATaskFromProject,
   getAllTasksFromProject,
+  getLastTaskFromProject,
+  toggleTaskStatus,
+  getTaskStatus,
   loadProjects,
   changeTaskDescription,
   deleteTaskFromProject,
