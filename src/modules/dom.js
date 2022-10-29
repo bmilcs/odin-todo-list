@@ -31,7 +31,8 @@ const renderLayout = () => {
 const renderSidebar = () => {
   containerize(
     main.sidebar,
-    makeElement("h2", "sidebar-title", "By Date"),
+    makeElement("h2", "sidebar-title", "Due Dates"),
+    prepNavBtn("Overdue"),
     prepNavBtn("Today"),
     prepNavBtn("This Week"),
     prepNavBtn("This Month"),
@@ -58,7 +59,8 @@ const swapProjectEvent = (e) => {
   if (
     navTarget === "Today" ||
     navTarget === "This Week" ||
-    navTarget === "This Month"
+    navTarget === "This Month" ||
+    navTarget === "Overdue"
   )
     renderDateFilteredProjects(navTarget);
   else if (navTarget === "View All") renderAllProjects();

@@ -1,4 +1,12 @@
-import { endOfMonth, endOfWeek, isBefore, addDays, parseISO } from "date-fns";
+import {
+  endOfMonth,
+  endOfWeek,
+  isBefore,
+  subDays,
+  addDays,
+  parseISO,
+  isAfter,
+} from "date-fns";
 import Project from "./project";
 import Task from "./task";
 
@@ -72,6 +80,9 @@ const getTasksFilteredByDate = (timeframeDescription) => {
     dateRestriction = addDays(endOfWeek(todaysDate), 1);
   } else if (timeframeDescription === "This Month")
     dateRestriction = endOfMonth(todaysDate);
+  else if (timeframeDescription === "Overdue") {
+    dateRestriction = todaysDate;
+  }
 
   // recreate the same data structure, filtering tasks by date
   // create a new array: filteredStorage[] > filteredProject{}.tasks[] > filteredTasks{}
@@ -81,7 +92,12 @@ const getTasksFilteredByDate = (timeframeDescription) => {
     // remove any tasks that aren't before the date restriction
     const filteredTasks = allTasks.filter((task) => {
       const parsedDuedate = parseISO(task.dueDate);
-      return isBefore(parsedDuedate, dateRestriction);
+      const overDue = !isAfter(parsedDuedate, subDays(todaysDate, 1));
+      const beforeDateRestriction = isBefore(parsedDuedate, dateRestriction);
+      if (overDue) console.log(`${task.description} is overdue`);
+      return timeframeDescription === "Overdue"
+        ? overDue
+        : !overDue && beforeDateRestriction;
     });
     // if no tasks remain, return without adding the project to the new array
     if (filteredTasks.length === 0) {
