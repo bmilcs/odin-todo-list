@@ -105,7 +105,7 @@ SOLID design is challenging and my objects aren't as loosely coupled as I had ho
 
 ## Screenshots
 
-In progress...
+![Desktop Screenshot](./src/assets/screenshot.png)
 
 ## Deployment
 
