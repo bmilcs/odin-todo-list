@@ -1,7 +1,7 @@
 import "../scss/index.scss";
 import makeElement from "./utils/make-element";
 import containerize from "./utils/containerize";
-import header from "./header";
+import { createHeader } from "./header";
 import footer from "./footer";
 import main from "./main";
 import * as Storage from "./storage";
@@ -19,9 +19,14 @@ export const renderPage = () => {
   renderAllProjects();
 };
 
+export const reRenderPage = () => {
+  clearPage();
+  renderLayout();
+};
+
 const renderLayout = () => {
   const body = document.querySelector("body");
-  containerize(body, header, main.sidebar, main.content, footer);
+  containerize(body, createHeader(), main.sidebar, main.content, footer);
 };
 
 const renderSidebar = () => {
@@ -359,6 +364,8 @@ const clearContainer = (element) => {
     element.removeChild(element.firstChild);
   }
 };
+
+const clearPage = () => clearContainer(document.getElementsByTagName("body"));
 
 const clearSidebar = () => clearContainer(main.sidebar);
 

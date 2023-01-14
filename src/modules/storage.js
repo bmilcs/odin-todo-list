@@ -120,8 +120,6 @@ const changeTaskDescription = (originalValue, newValue, projectName) => {
 
 const toggleTaskStatus = (taskDescription, projectName) => {
   const taskObj = getATaskFromProject(taskDescription, projectName);
-  console.log(taskObj);
-  console.log(getATaskFromProject(taskDescription, projectName));
   taskObj.toggleStatus();
   saveToLocalStorage();
 };

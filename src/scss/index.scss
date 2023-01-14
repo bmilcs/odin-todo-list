@@ -61,7 +61,7 @@ label {
 
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 0.5rem;
 
   background: var(--clr-accent-100);
@@ -76,6 +76,35 @@ label {
     color: (--clr-neutral-800);
     width: 2.5rem;
     aspect-ratio: 1/1;
+  }
+
+  .sign-in-button {
+    border: var(--border-radius);
+
+    padding: 0.5rem 1rem;
+
+    background: var(--clr-neutral-900);
+    color: var(--clr-neutral-100);
+
+    font-weight: 400;
+    font-size: 1rem;
+  }
+
+  .signed-in-container,
+  .title-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .signed-in-container {
+    h2 {
+      font-weight: normal;
+      font-size: 1.25rem;
+    }
+    img {
+      border-radius: 50%;
+    }
   }
 }
 
