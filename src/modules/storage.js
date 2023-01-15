@@ -203,6 +203,14 @@ const deleteTaskFromProject = (description, projectName) => {
   saveData();
 };
 
+const isDuplicateTask = (newTask, projectName) => {
+  const siblingTasks = getAllTasksFromProject(projectName);
+  const siblingTaskDescriptions = siblingTasks.map((task) => task.description);
+  return siblingTaskDescriptions.some(
+    (existingTask) => existingTask === newTask
+  );
+};
+
 const changeTaskDueDate = (date, description, projectName) => {
   const task = getATaskFromProject(description, projectName);
   task.setDate(date);
@@ -222,6 +230,7 @@ export {
   loadData,
   changeTaskDescription,
   deleteTaskFromProject,
+  isDuplicateTask,
   changeTaskDueDate,
   generateSampleData,
   getTasksFilteredByDate,

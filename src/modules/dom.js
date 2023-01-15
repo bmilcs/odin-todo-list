@@ -196,11 +196,13 @@ const addTaskEvent = (e) => {
   const element = e.target;
   const parentProject = getParentProjectElement(element);
   const textbox = parentProject.querySelector("input");
-  // make sure text was entered
-  if (textbox.value === "") return;
-  // add new task to storage
+  const textboxValue = textbox.value;
   const projectName = getParentProjectName(element);
-  Storage.addTaskToProject(textbox.value, projectName);
+  const isDuplicate = Storage.isDuplicateTask(textboxValue, projectName);
+  // make sure text was entered & isn't a duplicate task
+  if (isDuplicate || !textboxValue) return;
+  // add new task to storage
+  Storage.addTaskToProject(textboxValue, projectName);
   // create task elements & append it to the page
   const lastTaskObj = Storage.getLastTaskFromProject(projectName);
   const taskElement = prepTask(lastTaskObj);
@@ -316,16 +318,17 @@ const editTaskDescriptionEvent = (e) => {
       // edit mode is over:
       input.disabled = true;
       taskContainer.classList.remove("edit-task-mode");
-      // escape: restore original value only
-      if (e.key === "Escape") {
+      const newValue = input.value;
+      const projectName = getParentProjectName(input);
+      const isDuplicateTask = Storage.isDuplicateTask(newValue, projectName);
+
+      // escape key or duplicate/empty task: restore original value only
+      if (e.key === "Escape" || isDuplicateTask || !newValue) {
         input.value = originalValue;
       } else {
-        // enter/editIcon: if change was made, update storage
-        const newValue = input.value;
-        if (newValue !== originalValue) {
-          const projectName = getParentProjectName(editIcon);
-          Storage.changeTaskDescription(originalValue, newValue, projectName);
-        }
+        // enter/editIcon: if change was made
+        const projectName = getParentProjectName(editIcon);
+        Storage.changeTaskDescription(originalValue, newValue, projectName);
       }
       editIcon.removeEventListener("click", submitEditedDescription);
       input.removeEventListener("keydown", submitEditedDescription);
