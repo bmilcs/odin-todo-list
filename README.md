@@ -100,7 +100,7 @@ SOLID design is challenging and my objects aren't as loosely coupled as I had ho
 
 ## Links
 
-- [Live Demo](https://bmilcs.github.io/odin-todo-list/)
+- [Live Demo](https://bmilcs.com/odin-todo-list/)
 - [My Odin Project Progress](https://github.com/bmilcs/odin-project)
 
 ## Screenshots
