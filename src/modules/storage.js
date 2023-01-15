@@ -9,6 +9,7 @@ import {
 } from "date-fns";
 import Project from "./project";
 import Task from "./task";
+import { saveDataToFirebase } from "./firebase";
 
 const Storage = [];
 
@@ -25,6 +26,7 @@ const Storage = [];
 
 const saveToLocalStorage = () => {
   localStorage.setItem("bmilcs-todolist", JSON.stringify(Storage));
+  saveDataToFirebase(Storage);
 };
 
 const addProject = (projectName) => {

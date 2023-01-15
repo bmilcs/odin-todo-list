@@ -10,6 +10,7 @@ import {
   getFirestore,
   collection,
   addDoc,
+  deleteDoc,
   query,
   orderBy,
   limit,
@@ -18,6 +19,8 @@ import {
   updateDoc,
   doc,
   serverTimestamp,
+  getDocs,
+  getDoc,
 } from "firebase/firestore";
 import * as DOM from "./dom";
 
@@ -35,8 +38,6 @@ const config = {
 };
 
 const app = initializeApp(config);
-
-console.log("isUserSignedIn()", isUserSignedIn());
 
 //
 // firebase utility functions
@@ -60,8 +61,6 @@ function authStateObserver(user) {
     var profilePicUrl = getProfilePicUrl();
     var userName = getUserName();
 
-    console.log(userName);
-
     DOM.reRenderPage();
 
     // We save the Firebase Messaging Device token and enable notifications.
@@ -71,19 +70,70 @@ function authStateObserver(user) {
   }
 }
 
-// Returns the signed-in user's profile Pic URL.
+// returns the signed-in user's profile Pic URL.
 export function getProfilePicUrl() {
   return getAuth().currentUser.photoURL;
 }
 
-// Returns the signed-in user's display name.
+// returns the signed-in user's display name.
 export function getUserName() {
   return getAuth().currentUser.displayName;
 }
 
-// Returns true if a user is signed-in.
+// returns true if a user is signed-in.
 export function isUserSignedIn() {
   return !!getAuth().currentUser;
+}
+
+// save user data to database
+export async function saveDataToFirebase(storageArray) {
+  const db = getFirestore(app);
+  const user = getUserName();
+
+  const unusedDocuments = await getUnusedDocuments(db, user, storageArray);
+
+  if (unusedDocuments) await cleanUpOldDocuments(db, user, unusedDocuments);
+
+  // delete a collection:
+
+  try {
+    storageArray.forEach(async (projectObj) => {
+      const project = JSON.parse(JSON.stringify(projectObj));
+
+      await setDoc(doc(db, `${user}/${project.name}`), {
+        project,
+      });
+    });
+  } catch (error) {
+    console.error("Error writing new message to Firebase Database", error);
+  }
+}
+
+async function getUnusedDocuments(db, user, storageArray) {
+  const allCollections = query(collection(db, user));
+  const querySnapshot = await getDocs(allCollections);
+  let unusedDocuments = [];
+
+  // loop through each document
+  querySnapshot.forEach((doc) => {
+    // check if document exists in project's storageArray
+    const activeProject = storageArray.some((project) => {
+      if (project.name === doc.id) {
+        return true;
+      }
+    });
+
+    if (!activeProject) unusedDocuments.push(doc.id);
+  });
+
+  return unusedDocuments;
+}
+
+async function cleanUpOldDocuments(db, user, unusedDocuments) {
+  // delete all unused documents from firebase
+  unusedDocuments.forEach(async (docID) => {
+    await deleteDoc(doc(db, user, docID));
+  });
 }
 
 // // Get a list of cities from your database
