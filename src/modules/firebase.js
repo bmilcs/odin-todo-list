@@ -1,5 +1,4 @@
 import { initializeApp } from "firebase/app";
-import { reassembleData, getAllProjectNames } from "./storage";
 import {
   getAuth,
   onAuthStateChanged,
@@ -7,23 +6,9 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import {
-  getFirestore,
-  collection,
-  addDoc,
-  deleteDoc,
-  query,
-  orderBy,
-  limit,
-  onSnapshot,
-  setDoc,
-  updateDoc,
-  doc,
-  serverTimestamp,
-  getDocs,
-  getDoc,
-} from "firebase/firestore";
+import { getFirestore, setDoc, doc, getDoc } from "firebase/firestore";
 import * as DOM from "./dom";
+import * as Storage from "./storage";
 
 //
 // firebase setup (baas)
@@ -41,8 +26,9 @@ const CONFIG = {
 const app = initializeApp(CONFIG);
 const db = getFirestore(app);
 
-const DB_COLLECTION = "users";
+// assigned on user auth change (user email)
 let dbDocument = null;
+const DB_COLLECTION = "users";
 
 //
 // authentication
@@ -53,8 +39,17 @@ export async function signIn() {
   await signInWithPopup(getAuth(), provider);
 }
 
+export function userSignOut() {
+  signOut(getAuth())
+    .then(() => {
+      Storage.clearStorageArray();
+      Storage.loadLocally();
+    })
+    .then(() => DOM.reRenderPage());
+}
+
 // enable auth state observer
-function initAuthentication() {
+export function initAuthentication() {
   onAuthStateChanged(getAuth(), authStateObserver);
 }
 
@@ -62,12 +57,13 @@ function initAuthentication() {
 async function authStateObserver(user) {
   if (user) {
     // user is logged in
-    // set global firebase collection > document to user's email
     dbDocument = getUserEmail();
-    await loadDataFromFirebase();
+    Storage.clearStorageArray();
+    await loadData();
     DOM.reRenderPage();
   } else {
-    // User is signed out!
+    // user is signed out
+    DOM.reRenderPage();
   }
 }
 
@@ -101,7 +97,7 @@ export function isUserSignedIn() {
 
 // save user data to database
 // triggered on changes to the local Storage Array in /storage.js module.
-export async function saveDataToFirebase(storageArray) {
+export async function saveData(storageArray) {
   try {
     const projects = JSON.parse(JSON.stringify(storageArray));
     await setDoc(doc(db, DB_COLLECTION, dbDocument), {
@@ -113,24 +109,13 @@ export async function saveDataToFirebase(storageArray) {
 }
 
 // load data from database
-export async function loadDataFromFirebase() {
+export async function loadData() {
   const docRef = doc(db, DB_COLLECTION, dbDocument);
   const docSnap = await getDoc(docRef);
   const fetchedData = docSnap.data();
   if (!fetchedData) return;
-  const projectsArray = fetchedData.projects;
-  reassembleData(projectsArray);
+  const rawProjectData = fetchedData.projects;
+  Storage.reassembleData(rawProjectData);
 }
-
-// // Get a list of cities from your database
-// async function getStorageFromFirebase(db) {
-//   const data = collection(db, "todos");
-//   console.log(data);
-//   // const citiesCol = collection(db, "cities");
-//   // const citySnapshot = await getDocs(citiesCol);
-//   // const cityList = citySnapshot.docs.map((doc) => doc.data());
-//   // return cityList;
-// }
-// getStorageFromFirebase(db);
 
 initAuthentication();

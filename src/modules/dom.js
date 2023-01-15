@@ -12,8 +12,12 @@ import checkboxEmptySVG from "../assets/unchecked.svg";
 import editSVG from "../assets/edit.svg";
 import arrowSVG from "../assets/arrow.svg";
 
+export const startApp = () => {
+  Storage.loadData();
+  renderPage();
+};
+
 export const renderPage = () => {
-  Storage.loadProjects();
   renderLayout();
   renderSidebar();
   renderAllProjects();
@@ -21,6 +25,7 @@ export const renderPage = () => {
 
 export const reRenderPage = () => {
   clearPage();
+  clearMainContent();
   clearSidebar();
   renderPage();
 };

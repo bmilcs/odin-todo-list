@@ -9,12 +9,9 @@ import {
 } from "date-fns";
 import Project from "./project";
 import Task from "./task";
-import { loadDataFromFirebase, saveDataToFirebase } from "./firebase";
-
-const Storage = [];
+import * as FB from "./firebase";
 
 // DATA STRUCTURE:
-//
 // Storage = []
 //   Project {}
 //     name: Project Name
@@ -24,34 +21,78 @@ const Storage = [];
 //         dueDate: ...
 //         getDescription()
 
-const saveToLocalStorage = () => {
-  localStorage.setItem("bmilcs-todolist", JSON.stringify(Storage));
-  saveDataToFirebase(Storage);
+const Storage = [];
+
+const clearStorageArray = () => (Storage.length = 0);
+
+const saveData = async () => {
+  if (FB.isUserSignedIn()) {
+    await FB.saveData(Storage);
+  } else {
+    saveLocally();
+  }
 };
 
-const loadProjects = () => {
-  loadProjectsFromLocalStorage();
-  // TODO:
-  // if logged in,
-  //     Fetch FireBase data
-  //     Compare local data to firebase data
-  //     If different, add localdata to firebase data
-  //     Else load firebase
-  //  Not logged in,
-  //     LocalStorage
-  //     SampleData fall back
-  // ----------------------------------------
-  // if (localStorage.getItem("bmilcs-todolist")) {
-  // loadProjectsFromLocalStorage();
-  // } else {
-  // generateSampleData();
-  // }
+const saveLocally = () => {
+  localStorage.setItem("bmilcs-todolist", JSON.stringify(Storage));
+};
+
+const loadData = async () => {
+  if (FB.isUserSignedIn()) {
+    await loadFromDB();
+  } else if (localStorage.getItem("bmilcs-todolist")) {
+    loadLocally();
+  } else {
+    generateSampleData();
+  }
+};
+
+const loadFromDB = async () => {
+  await FB.loadData();
+};
+
+const loadLocally = () => {
+  const rawData = JSON.parse(localStorage.getItem("bmilcs-todolist"));
+  reassembleData(rawData);
+};
+
+const reassembleData = (importedData) => {
+  const reassembledArrayofProjectObjects = importedData.map((project) => {
+    // localStorage strips away prototype/methods/constructors
+    // convert Storage[] > Project{}.tasks[] > task{} to new Task objects
+    const tasksWithPrototype = project["tasks"].map((task) => {
+      return new Task(task.description, task.dueDate, task.status);
+    });
+    // convert Storage[] > project{} to Project objects
+    const projectWithPrototype = Object.assign(new Project(project.name));
+    // reassmble the final data structure:
+    projectWithPrototype.tasks = tasksWithPrototype;
+    return projectWithPrototype;
+  });
+  reassembledArrayofProjectObjects.forEach((project) => Storage.push(project));
+};
+
+const generateSampleData = () => {
+  const list = addProject("Web Development");
+  list.addTask("Finish my todo list project", "2022-11-01");
+  list.addTask("Complete Odin Project", "2023-01-01");
+  const list2 = addProject("Home Renovation");
+  list2.addTask("Install living room windows", "2023-01-01");
+  list2.addTask(
+    "Spray foam insulation in window rough opening gaps",
+    "2023-01-01"
+  );
+  list2.addTask("Cut & install window casing", "2023-01-01");
+  list2.addTask("Prime window trim", "2023-01-01");
+  list2.addTask("Caulk interior & exterior", "2023-01-01");
+  list2.addTask("Paint window", "2023-01-01");
+  saveData();
 };
 
 const addProject = (projectName) => {
   const project = new Project(projectName);
   Storage.push(project);
-  saveToLocalStorage();
+  saveData();
   return project;
 };
 
@@ -89,7 +130,7 @@ const isProjectEmpty = (projectName) => {
 const deleteProject = (projectName) => {
   const index = Storage.findIndex((project) => project.name === projectName);
   Storage.splice(index, 1);
-  saveToLocalStorage();
+  saveData();
 };
 
 const getTasksFilteredByDate = (timeframeDescription) => {
@@ -136,13 +177,13 @@ const getTasksFilteredByDate = (timeframeDescription) => {
 const changeTaskDescription = (originalValue, newValue, projectName) => {
   const taskObj = getATaskFromProject(originalValue, projectName);
   taskObj.description = newValue;
-  saveToLocalStorage;
+  saveData();
 };
 
 const toggleTaskStatus = (taskDescription, projectName) => {
   const taskObj = getATaskFromProject(taskDescription, projectName);
   taskObj.toggleStatus();
-  saveToLocalStorage();
+  saveData();
 };
 
 const getTaskStatus = (taskDescription, projectName) => {
@@ -153,58 +194,19 @@ const getTaskStatus = (taskDescription, projectName) => {
 const addTaskToProject = (description, projectName) => {
   const taskList = getProjectObj(projectName);
   taskList.addTask(description);
-  saveToLocalStorage();
+  saveData();
 };
 
 const deleteTaskFromProject = (description, projectName) => {
   const taskList = getProjectObj(projectName);
   taskList.deleteTask(description);
-  saveToLocalStorage();
+  saveData();
 };
 
 const changeTaskDueDate = (date, description, projectName) => {
   const task = getATaskFromProject(description, projectName);
   task.setDate(date);
-  saveToLocalStorage();
-};
-
-const loadProjectsFromLocalStorage = () => {
-  const importedData = JSON.parse(localStorage.getItem("bmilcs-todolist"));
-  console.log("localStorage", importedData);
-  // reassembleStorageDataStructure(importedData);
-};
-
-const reassembleData = (importedData) => {
-  const reassembledArrayofProjectObjects = importedData.map((project) => {
-    // localStorage strips away prototype/methods/constructors
-    // convert Storage[] > Project{}.tasks[] > task{} to new Task objects
-    const tasksWithPrototype = project["tasks"].map((task) => {
-      return new Task(task.description, task.dueDate, task.status);
-    });
-    // convert Storage[] > project{} to Project objects
-    const projectWithPrototype = Object.assign(new Project(project.name));
-    // reassmble the final data structure:
-    projectWithPrototype.tasks = tasksWithPrototype;
-    return projectWithPrototype;
-  });
-  reassembledArrayofProjectObjects.forEach((project) => Storage.push(project));
-};
-
-const generateSampleData = () => {
-  const list = addProject("Web Development");
-  list.addTask("Finish my todo list project", "2022-11-01");
-  list.addTask("Complete Odin Project", "2023-01-01");
-  const list2 = addProject("Home Renovation");
-  list2.addTask("Install living room windows", "2023-01-01");
-  list2.addTask(
-    "Spray foam insulation in window rough opening gaps",
-    "2023-01-01"
-  );
-  list2.addTask("Cut & install window casing", "2023-01-01");
-  list2.addTask("Prime window trim", "2023-01-01");
-  list2.addTask("Caulk interior & exterior", "2023-01-01");
-  list2.addTask("Paint window", "2023-01-01");
-  saveToLocalStorage();
+  saveData();
 };
 
 export {
@@ -217,7 +219,7 @@ export {
   getLastTaskFromProject,
   toggleTaskStatus,
   getTaskStatus,
-  loadProjects,
+  loadData,
   changeTaskDescription,
   deleteTaskFromProject,
   changeTaskDueDate,
@@ -226,4 +228,7 @@ export {
   isProjectEmpty,
   deleteProject,
   reassembleData,
+  saveLocally,
+  clearStorageArray,
+  loadLocally,
 };

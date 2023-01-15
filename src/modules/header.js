@@ -1,26 +1,28 @@
 import makeElement from "./utils/make-element";
 import containerize from "./utils/containerize";
 import headerIcon from "../assets/header-icon-2.svg";
-// firebase additions
-import {
-  signIn,
-  isUserSignedIn,
-  getUserName,
-  getProfilePicUrl,
-} from "./firebase";
+import * as FB from "./firebase";
 
 export const createHeader = () => {
-  let signInButtunOrUserName = null;
+  let userDetailsOrSignIn = null;
 
-  if (isUserSignedIn()) {
-    signInButtunOrUserName = containerize(
+  if (FB.isUserSignedIn()) {
+    const signOutButton = makeElement(
+      "button",
+      "sign-out-button",
+      "(Sign Out)"
+    );
+    signOutButton.addEventListener("click", FB.userSignOut);
+
+    userDetailsOrSignIn = containerize(
       "signed-in-container",
-      makeElement("h2", "user-name", getUserName()),
-      makeElement("img", "user-avatar", "", "", getProfilePicUrl())
+      signOutButton,
+      makeElement("h2", "user-name", FB.getUserName()),
+      makeElement("img", "user-avatar", "", "", FB.getProfilePicUrl())
     );
   } else {
-    signInButtunOrUserName = makeElement("button", "sign-in-button", "Sign In");
-    signInButtunOrUserName.addEventListener("click", signIn);
+    userDetailsOrSignIn = makeElement("button", "sign-in-button", "Sign In");
+    userDetailsOrSignIn.addEventListener("click", FB.signIn);
   }
 
   const staticElements = [
@@ -31,9 +33,5 @@ export const createHeader = () => {
     ),
   ];
 
-  return containerize(
-    "header-container",
-    staticElements,
-    signInButtunOrUserName
-  );
+  return containerize("header-container", staticElements, userDetailsOrSignIn);
 };

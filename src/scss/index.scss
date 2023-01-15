@@ -78,7 +78,8 @@ label {
     aspect-ratio: 1/1;
   }
 
-  .sign-in-button {
+  .sign-in-button,
+  .sign-out-button {
     border: var(--border-radius);
 
     padding: 0.5rem 1rem;
@@ -88,6 +89,12 @@ label {
 
     font-weight: 400;
     font-size: 1rem;
+  }
+
+  .sign-out-button {
+    background: none;
+    color: var(--clr-neutral-900);
+    font-size: 0.85rem;
   }
 
   .signed-in-container,
