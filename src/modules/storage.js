@@ -9,7 +9,7 @@ import {
 } from "date-fns";
 import Project from "./project";
 import Task from "./task";
-import { saveDataToFirebase } from "./firebase";
+import { loadDataFromFirebase, saveDataToFirebase } from "./firebase";
 
 const Storage = [];
 
@@ -27,6 +27,25 @@ const Storage = [];
 const saveToLocalStorage = () => {
   localStorage.setItem("bmilcs-todolist", JSON.stringify(Storage));
   saveDataToFirebase(Storage);
+};
+
+const loadProjects = () => {
+  loadProjectsFromLocalStorage();
+  // TODO:
+  // if logged in,
+  //     Fetch FireBase data
+  //     Compare local data to firebase data
+  //     If different, add localdata to firebase data
+  //     Else load firebase
+  //  Not logged in,
+  //     LocalStorage
+  //     SampleData fall back
+  // ----------------------------------------
+  // if (localStorage.getItem("bmilcs-todolist")) {
+  // loadProjectsFromLocalStorage();
+  // } else {
+  // generateSampleData();
+  // }
 };
 
 const addProject = (projectName) => {
@@ -149,27 +168,26 @@ const changeTaskDueDate = (date, description, projectName) => {
   saveToLocalStorage();
 };
 
-const loadProjects = () => {
-  if (localStorage.getItem("bmilcs-todolist") !== null) {
-    const importedData = JSON.parse(localStorage.getItem("bmilcs-todolist"));
-    const reassembledArrayofProjectObjects = importedData.map((project) => {
-      // localStorage strips away prototype/methods/constructors
-      // convert Storage[] > Project{}.tasks[] > task{} to new Task objects
-      const tasksWithPrototype = project["tasks"].map((task) => {
-        return new Task(task.description, task.dueDate, task.status);
-      });
-      // convert Storage[] > project{} to Project objects
-      const projectWithPrototype = Object.assign(new Project(project.name));
-      // reassmble the final data structure:
-      projectWithPrototype.tasks = tasksWithPrototype;
-      return projectWithPrototype;
+const loadProjectsFromLocalStorage = () => {
+  const importedData = JSON.parse(localStorage.getItem("bmilcs-todolist"));
+  console.log("localStorage", importedData);
+  // reassembleStorageDataStructure(importedData);
+};
+
+const reassembleData = (importedData) => {
+  const reassembledArrayofProjectObjects = importedData.map((project) => {
+    // localStorage strips away prototype/methods/constructors
+    // convert Storage[] > Project{}.tasks[] > task{} to new Task objects
+    const tasksWithPrototype = project["tasks"].map((task) => {
+      return new Task(task.description, task.dueDate, task.status);
     });
-    reassembledArrayofProjectObjects.forEach((project) =>
-      Storage.push(project)
-    );
-  } else {
-    generateSampleData();
-  }
+    // convert Storage[] > project{} to Project objects
+    const projectWithPrototype = Object.assign(new Project(project.name));
+    // reassmble the final data structure:
+    projectWithPrototype.tasks = tasksWithPrototype;
+    return projectWithPrototype;
+  });
+  reassembledArrayofProjectObjects.forEach((project) => Storage.push(project));
 };
 
 const generateSampleData = () => {
@@ -207,4 +225,5 @@ export {
   getTasksFilteredByDate,
   isProjectEmpty,
   deleteProject,
+  reassembleData,
 };

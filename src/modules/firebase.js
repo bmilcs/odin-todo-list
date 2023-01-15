@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { reassembleData, getAllProjectNames } from "./storage";
 import {
   getAuth,
   onAuthStateChanged,
@@ -25,10 +26,10 @@ import {
 import * as DOM from "./dom";
 
 //
-// firebase (baas)
+// firebase setup (baas)
 //
 
-const config = {
+const CONFIG = {
   apiKey: "AIzaSyAu23HZunl-09YtbNr75EaIF4CCftJVno8",
   authDomain: "odin-todo-list-ce596.firebaseapp.com",
   projectId: "odin-todo-list-ce596",
@@ -37,10 +38,14 @@ const config = {
   appId: "1:86009918486:web:6dc6734715c72ac9f83137",
 };
 
-const app = initializeApp(config);
+const app = initializeApp(CONFIG);
+const db = getFirestore(app);
+
+const DB_COLLECTION = "users";
+let dbDocument = null;
 
 //
-// firebase utility functions
+// authentication
 //
 
 export async function signIn() {
@@ -48,27 +53,27 @@ export async function signIn() {
   await signInWithPopup(getAuth(), provider);
 }
 
+// enable auth state observer
 function initAuthentication() {
   onAuthStateChanged(getAuth(), authStateObserver);
 }
 
-function authStateObserver(user) {
+// fired on authentication changes (sign in vs out)
+async function authStateObserver(user) {
   if (user) {
-    console.log("observer: user logged in");
-
-    // User is signed in!
-    // Get the signed-in user's profile pic and name.
-    var profilePicUrl = getProfilePicUrl();
-    var userName = getUserName();
-
+    // user is logged in
+    // set global firebase collection > document to user's email
+    dbDocument = getUserEmail();
+    await loadDataFromFirebase();
     DOM.reRenderPage();
-
-    // We save the Firebase Messaging Device token and enable notifications.
-    // saveMessagingDeviceToken();
   } else {
     // User is signed out!
   }
 }
+
+//
+// user info
+//
 
 // returns the signed-in user's profile Pic URL.
 export function getProfilePicUrl() {
@@ -80,60 +85,41 @@ export function getUserName() {
   return getAuth().currentUser.displayName;
 }
 
+// returns the signed-in user's gmail account
+export function getUserEmail() {
+  return getAuth().currentUser.email;
+}
+
 // returns true if a user is signed-in.
 export function isUserSignedIn() {
   return !!getAuth().currentUser;
 }
 
+//
+// database
+//
+
 // save user data to database
+// triggered on changes to the local Storage Array in /storage.js module.
 export async function saveDataToFirebase(storageArray) {
-  const db = getFirestore(app);
-  const user = getUserName();
-
-  const unusedDocuments = await getUnusedDocuments(db, user, storageArray);
-
-  if (unusedDocuments) await cleanUpOldDocuments(db, user, unusedDocuments);
-
-  // delete a collection:
-
   try {
-    storageArray.forEach(async (projectObj) => {
-      const project = JSON.parse(JSON.stringify(projectObj));
-
-      await setDoc(doc(db, `${user}/${project.name}`), {
-        project,
-      });
+    const projects = JSON.parse(JSON.stringify(storageArray));
+    await setDoc(doc(db, DB_COLLECTION, dbDocument), {
+      projects,
     });
   } catch (error) {
     console.error("Error writing new message to Firebase Database", error);
   }
 }
 
-async function getUnusedDocuments(db, user, storageArray) {
-  const allCollections = query(collection(db, user));
-  const querySnapshot = await getDocs(allCollections);
-  let unusedDocuments = [];
-
-  // loop through each document
-  querySnapshot.forEach((doc) => {
-    // check if document exists in project's storageArray
-    const activeProject = storageArray.some((project) => {
-      if (project.name === doc.id) {
-        return true;
-      }
-    });
-
-    if (!activeProject) unusedDocuments.push(doc.id);
-  });
-
-  return unusedDocuments;
-}
-
-async function cleanUpOldDocuments(db, user, unusedDocuments) {
-  // delete all unused documents from firebase
-  unusedDocuments.forEach(async (docID) => {
-    await deleteDoc(doc(db, user, docID));
-  });
+// load data from database
+export async function loadDataFromFirebase() {
+  const docRef = doc(db, DB_COLLECTION, dbDocument);
+  const docSnap = await getDoc(docRef);
+  const fetchedData = docSnap.data();
+  if (!fetchedData) return;
+  const projectsArray = fetchedData.projects;
+  reassembleData(projectsArray);
 }
 
 // // Get a list of cities from your database

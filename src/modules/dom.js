@@ -21,7 +21,8 @@ export const renderPage = () => {
 
 export const reRenderPage = () => {
   clearPage();
-  renderLayout();
+  clearSidebar();
+  renderPage();
 };
 
 const renderLayout = () => {
@@ -32,15 +33,15 @@ const renderLayout = () => {
 const renderSidebar = () => {
   containerize(
     main.sidebar,
-    makeElement("h2", "sidebar-title", "Due Dates"),
+    makeElement("h2", "sidebar-title", "Projects"),
+    prepAllProjectNavBtns(),
+    prepNavBtn("View All"),
+    prepAddNewProject(),
+    makeElement("h2", "sidebar-title", "By Date"),
     prepNavBtn("Overdue"),
     prepNavBtn("Today"),
     prepNavBtn("This Week"),
-    prepNavBtn("This Month"),
-    makeElement("h2", "sidebar-title", "Projects"),
-    prepNavBtn("View All"),
-    prepAllProjectNavBtns(),
-    prepAddNewProject()
+    prepNavBtn("This Month")
   );
 };
 
@@ -365,7 +366,8 @@ const clearContainer = (element) => {
   }
 };
 
-const clearPage = () => clearContainer(document.getElementsByTagName("body"));
+const clearPage = () =>
+  clearContainer(document.getElementsByTagName("body")[0]);
 
 const clearSidebar = () => clearContainer(main.sidebar);
 
